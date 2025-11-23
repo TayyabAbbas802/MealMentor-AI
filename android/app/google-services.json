@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764623398624",
+    "project_id": "mealmentor-ai-59502",
+    "storage_bucket": "mealmentor-ai-59502.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764623398624:android:71d1bc3f8b32dd285c9285",
+        "android_client_info": {
+          "package_name": "com.example.meal_mentor_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcmFKWTAFkLZVSBy8KfUVCeHQQdM6FEmA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
