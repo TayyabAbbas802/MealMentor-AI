@@ -20,7 +20,8 @@ import '../modules/exercise/exercise_binding.dart';
 import '../modules/exercise/exercise_view.dart';
 import '../modules/profile/profile_binding.dart';
 import '../modules/profile/profile_view.dart';
-
+import '../modules/Tutorial/tutorial_binding.dart';
+import '../modules/Tutorial/tutorial_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -45,6 +46,11 @@ class AppPages {
       binding: OnboardingBinding(),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.TUTORIAL,
+      page: () => const TutorialView(),
+      binding: TutorialBinding(),
     ),
 
     // Auth Screens
