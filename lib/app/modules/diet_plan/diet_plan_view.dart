@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
 import 'diet_plan_controller.dart';
 
@@ -14,7 +15,7 @@ class DietPlanView extends GetView<DietPlanController> {
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_awesome),
-            onPressed: controller.generateAIPlan,
+            onPressed: () => Get.toNamed(AppRoutes.CHATBOT),
             tooltip: 'Generate AI Plan',
           ),
         ],

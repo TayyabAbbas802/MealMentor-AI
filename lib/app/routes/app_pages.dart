@@ -16,6 +16,8 @@ import '../modules/nutrition/nutrition_binding.dart';
 import '../modules/nutrition/nutrition_view.dart';
 import '../modules/diet_plan/diet_plan_binding.dart';
 import '../modules/diet_plan/diet_plan_view.dart';
+import '../modules/chatbot/chatbot_binding.dart';
+import '../modules/chatbot/chatbot_view.dart';
 import '../modules/exercise/exercise_binding.dart';
 import '../modules/exercise/exercise_view.dart';
 import '../modules/profile/profile_binding.dart';
@@ -104,6 +106,13 @@ class AppPages {
       name: AppRoutes.DIET_PLAN,
       page: () => const DietPlanView(),
       binding: DietPlanBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.CHATBOT,
+      page: () => const ChatbotView(),
+      binding: ChatbotBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

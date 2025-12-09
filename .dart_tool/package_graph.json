@@ -14,7 +14,9 @@
         "firebase_storage",
         "fl_chart",
         "flutter",
+        "flutter_dotenv",
         "get",
+        "google_generative_ai",
         "image_picker",
         "intl",
         "shared_preferences"
@@ -47,6 +49,20 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_dotenv",
+      "version": "6.0.0",
+      "dependencies": [
+        "flutter"
+      ]
+    },
+    {
+      "name": "google_generative_ai",
+      "version": "0.4.7",
+      "dependencies": [
+        "http"
       ]
     },
     {
@@ -259,6 +275,16 @@
         "stream_channel",
         "string_scanner",
         "term_glyph"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
       ]
     },
     {
@@ -625,13 +651,13 @@
       ]
     },
     {
-      "name": "http",
-      "version": "1.6.0",
+      "name": "http_parser",
+      "version": "4.1.2",
       "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
       ]
     },
     {
@@ -657,16 +683,6 @@
       "version": "2.1.8",
       "dependencies": [
         "meta"
-      ]
-    },
-    {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
       ]
     },
     {
