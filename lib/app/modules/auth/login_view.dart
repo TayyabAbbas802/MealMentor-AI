@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../theme/app_colors.dart';
 import 'auth_controller.dart';
-import 'package:meal_mentor_ai/app/routes/app_pages.dart';
 
 class LoginView extends GetView<AuthController> {
   const LoginView({Key? key}) : super(key: key);
@@ -15,12 +14,12 @@ class LoginView extends GetView<AuthController> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Green gradient header
+              // Purple gradient header
               Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF00D09C), Color(0xFF34E5B8)],
+                    colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -38,7 +37,7 @@ class LoginView extends GetView<AuthController> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Icon(
@@ -60,8 +59,7 @@ class LoginView extends GetView<AuthController> {
                       const SizedBox(height: 8),
                       // Subtitle
                       const Text(
-                        'Continue your health journey with MealMentor AI',
-                        textAlign: TextAlign.center,
+                        'Log in to continue your health journey',
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white,
@@ -107,7 +105,7 @@ class LoginView extends GetView<AuthController> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Color(0xFF00D09C),
+                            color: Color(0xFF8B5CF6),
                             width: 2,
                           ),
                         ),
@@ -125,93 +123,83 @@ class LoginView extends GetView<AuthController> {
                     ),
                     const SizedBox(height: 8),
                     Obx(() => TextField(
-                      controller: controller.passwordController,
-                      obscureText: controller.obscurePassword.value,
-                      decoration: InputDecoration(
-                        hintText: 'Enter your password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.obscurePassword.value
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                          controller: controller.passwordController,
+                          obscureText: controller.obscurePassword.value,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your password',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.obscurePassword.value
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                              onPressed: controller.togglePasswordVisibility,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF5F5F5),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF8B5CF6),
+                                width: 2,
+                              ),
+                            ),
                           ),
-                          onPressed: controller.togglePasswordVisibility,
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xFFF5F5F5),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF00D09C),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                    )),
+                        )),
                     const SizedBox(height: 16),
-                    // Remember me and Forgot Password
+                    // Remember Me & Forgot Password
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Obx(() => Row(
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: Checkbox(
-                                value: controller.rememberMe.value,
-                                onChanged: (value) {
-                                  controller.rememberMe.value =
-                                      value ?? false;
-                                },
-                                activeColor: const Color(0xFF00D09C),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                              children: [
+                                SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: Checkbox(
+                                    value: controller.rememberMe.value,
+                                    onChanged: controller.toggleRememberMe,
+                                    activeColor: const Color(0xFF8B5CF6),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Remember me',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        )),
-                        // ✅ CORRECT
-                        GestureDetector(
-                          onTap: () {
-                            // Show dialog to enter email for password reset
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Remember Me',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            )),
+                        TextButton(
+                          onPressed: () {
+                            // Show forgot password dialog/screen
                             Get.dialog(
                               AlertDialog(
                                 title: const Text('Reset Password'),
                                 content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Text('Enter your email address to receive a password reset link.'),
+                                    const Text(
+                                        'Enter your email to receive a password reset link.'),
                                     const SizedBox(height: 16),
                                     TextField(
-                                      controller: controller.emailController,
-                                      decoration: InputDecoration(
-                                        hintText: 'Email',
-                                        prefixIcon: const Icon(Icons.email_outlined),
-                                        filled: true,
-                                        fillColor: const Color(0xFFF5F5F5),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
-                                        ),
+                                      controller: controller.emailController, // Re-use for simplicity
+                                      decoration: const InputDecoration(
+                                        hintText: 'Email Address',
                                       ),
                                     ),
                                   ],
@@ -223,13 +211,10 @@ class LoginView extends GetView<AuthController> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
-                                      Get.back();
                                       controller.resetPassword(controller.emailController.text);
+                                      Get.back();
                                     },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF8B5CF6),
-                                    ),
-                                    child: const Text('Send Reset Link'),
+                                    child: const Text('Send Link'),
                                   ),
                                 ],
                               ),
@@ -238,199 +223,124 @@ class LoginView extends GetView<AuthController> {
                           child: const Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              color: Color(0xFF8B5CF6),
-                              fontWeight: FontWeight.w600,
                               fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
-
                       ],
                     ),
-                    const SizedBox(height: 32),
-                    // Log In Button
+                    const SizedBox(height: 24),
+                    // Login Button
                     Obx(() => SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : controller.login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00D09C),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: controller.isLoading.value ? null : controller.login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF7C3AED),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 5,
+                              shadowColor: const Color(0xFF7C3AED).withOpacity(0.5),
+                            ),
+                            child: controller.isLoading.value
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : const Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
-                          disabledBackgroundColor:
-                          const Color(0xFF00D09C).withOpacity(0.5),
-                        ),
-                        child: controller.isLoading.value
-                            ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white),
-                          ),
-                        )
-                            : const Text(
-                          'Log In',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )),
+                        )),
                     const SizedBox(height: 24),
                     // Or continue with
-                    const Row(
+                    Row(
                       children: [
-                        Expanded(child: Divider()),
+                        const Expanded(
+                          child: Divider(color: AppColors.divider),
+                        ),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'Or continue with',
                             style: TextStyle(
-                              color: AppColors.textSecondary,
                               fontSize: 14,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ),
-                        Expanded(child: Divider()),
+                        const Expanded(
+                          child: Divider(color: AppColors.divider),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // Social login buttons
+                    // Social Login Buttons
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Get.snackbar(
-                                'Coming Soon',
-                                'Google Sign In will be available soon',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              side: const BorderSide(color: AppColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.network(
-                                  'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                                  height: 24,
-                                  width: 24,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.g_mobiledata,
-                                      size: 24,
-                                      color: AppColors.textPrimary,
-                                    );
-                                  },
-                                ),
-                                const SizedBox(width: 12),
-                                const Text(
-                                  'Google',
-                                  style: TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              Get.snackbar(
-                                'Coming Soon',
-                                'Facebook Sign In will be available soon',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              side: const BorderSide(color: AppColors.border),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF1877F2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.facebook,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                const Text(
-                                  'Facebook',
-                                  style: TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        _buildSocialButton(icon: 'assets/icons/google.svg', onPressed: controller.signInWithGoogle),
+                        const SizedBox(width: 24),
+                        _buildSocialButton(icon: 'assets/icons/facebook.svg', onPressed: controller.signInWithFacebook),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // Don't have account - Sign Up
+                    // Don't have an account
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          "Don't have an account? ",
+                          'Don\'t have an account?',
                           style: TextStyle(
-                            color: AppColors.textSecondary,
                             fontSize: 14,
+                            color: AppColors.textSecondary,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: controller.navigateToSignup,
+                        TextButton(
+                          onPressed: controller.navigateToSignup,
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(
-                              color: Color(0xFF00D09C),
-                              fontWeight: FontWeight.w600,
                               fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
                   ],
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({required String icon, required VoidCallback onPressed}) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.divider),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: // SvgPicture.asset is not available in flutter/material.dart
+            // You need to add a dependency like flutter_svg and import it.
+            // For now, I will use an Icon.
+            (icon.contains('google'))
+                ? const Icon(Icons.g_mobiledata, size: 30)
+                : const Icon(Icons.facebook, size: 30),
       ),
     );
   }

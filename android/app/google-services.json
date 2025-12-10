@@ -12,7 +12,20 @@
           "package_name": "com.example.meal_mentor_ai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "764623398624-qtklvv9dmi51vv8r7911hu96epl2qfc8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.meal_mentor_ai",
+            "certificate_hash": "f261012fa03e1e4f75e78551eac551594340c15d"
+          }
+        },
+        {
+          "client_id": "764623398624-lnkmnd6gbpca8d5dkqj795bbars65jhv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDcmFKWTAFkLZVSBy8KfUVCeHQQdM6FEmA"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "764623398624-lnkmnd6gbpca8d5dkqj795bbars65jhv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "764623398624-nqqstsojo7aovskqcv41e1cs7iqp15pr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mealmentorai.mealMentor"
+              }
+            }
+          ]
         }
       }
     }
