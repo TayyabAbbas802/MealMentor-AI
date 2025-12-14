@@ -13,5 +13,8 @@ abstract class AppRoutes {
   static const CHATBOT = '/chatbot';
 
   static const USER_INFO = '/user-info'; // Add this
-
+  static const EXERCISE_SETUP = '/exercise-setup';
+  static const WEEKLY_PLAN = '/weekly-plan';
+  static const ACTIVE_WORKOUT = '/active-workout';
+  static const PROGRESS_DASHBOARD = '/progress';
 }

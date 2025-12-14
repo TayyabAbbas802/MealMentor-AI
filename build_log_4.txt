@@ -1,0 +1,24 @@
+Running Gradle task 'assembleDebug'...                          
+lib/app/modules/progress/progress_dashboard.dart:244:23: Error: The argument type 'ProgressController/*1*/' can't be assigned to the parameter type 'ProgressController/*2*/'.
+ - 'ProgressController/*1*/' is from 'package:meal_mentor_ai/app/modules/progress//progress_controller.dart' ('lib/app/modules/progress//progress_controller.dart').
+ - 'ProgressController/*2*/' is from 'package:meal_mentor_ai/app/modules/progress/progress_controller.dart' ('lib/app/modules/progress/progress_controller.dart').
+          controller: controller,
+                      ^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/Users/macbookpro/development/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 4s
+Running Gradle task 'assembleDebug'...                              5.1s
+Gradle task assembleDebug failed with exit code 1

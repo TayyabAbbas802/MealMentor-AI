@@ -1,0 +1,24 @@
+Running Gradle task 'assembleDebug'...                          
+lib/app/modules/workout_plan/weekly_plan_screen.dart:38:44: Error: The getter 'firebaseService' isn't defined for the type 'WorkoutPlanController'.
+ - 'WorkoutPlanController' is from 'package:meal_mentor_ai/app/modules/workout_plan/workout_plan_controller.dart' ('lib/app/modules/workout_plan/workout_plan_controller.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'firebaseService'.
+                      'userId': controller.firebaseService.currentUser!.uid,
+                                           ^^^^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/Users/macbookpro/development/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 4s
+Running Gradle task 'assembleDebug'...                              4.6s
+Gradle task assembleDebug failed with exit code 1

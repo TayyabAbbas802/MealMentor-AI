@@ -1,0 +1,125 @@
+Running Gradle task 'assembleDebug'...                          
+lib/app/modules/active_workout_progress//active_workout_controller.dart:4:8: Error: Error when reading 'lib/app/modules/data/models/workout_log_model.dart': No such file or directory
+import '../../data/models/workout_log_model.dart';
+       ^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:5:8: Error: Error when reading 'lib/app/modules/data/models/workout_plan_model.dart': No such file or directory
+import '../../data/models/workout_plan_model.dart';
+       ^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:6:8: Error: Error when reading 'lib/app/modules/data/services/firebase_service.dart': No such file or directory
+import '../../data/services/firebase_service.dart';
+       ^
+lib/app/modules/progress//progress_controller.dart:5:8: Error: Error when reading 'lib/app/modules/data/services/firebase_service.dart': No such file or directory
+import '../../data/services/firebase_service.dart';
+       ^
+lib/app/modules/progress//progress_controller.dart:4:8: Error: Error when reading 'lib/app/modules/data/models/progress_model.dart': No such file or directory
+import '../../data/models/progress_model.dart';
+       ^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:9:8: Error: Type 'FirebaseService' not found.
+  late FirebaseService _firebaseService;
+       ^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:25:8: Error: Type 'WorkoutDayModel' not found.
+  late WorkoutDayModel currentDay;
+       ^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:38:14: Error: Type 'WorkoutDayModel' not found.
+    required WorkoutDayModel day,
+             ^^^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:8:8: Error: Type 'FirebaseService' not found.
+  late FirebaseService _firebaseService;
+       ^^^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:95:8: Error: Type 'ProgressModel' not found.
+  List<ProgressModel> getExerciseProgressTrend(int exerciseWgerId) {
+       ^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:100:3: Error: Type 'ProgressModel' not found.
+  ProgressModel? getPersonalRecord(int exerciseWgerId) {
+  ^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:22:25: Error: 'ExerciseLogModel' isn't a type.
+  final exerciseLogs = <ExerciseLogModel>[].obs;
+                        ^^^^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:17:28: Error: 'ProgressModel' isn't a type.
+  final progressMetrics = <ProgressModel>[].obs;
+                           ^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:18:42: Error: 'ProgressModel' isn't a type.
+  final exerciseProgressMap = <int, List<ProgressModel>>{}.obs;
+                                         ^^^^^^^^^^^^^
+lib/app/modules/progress/progress_dashboard.dart:244:23: Error: The argument type 'ProgressController/*1*/' can't be assigned to the parameter type 'ProgressController/*2*/'.
+ - 'ProgressController/*1*/' is from 'package:meal_mentor_ai/app/modules/progress//progress_controller.dart' ('lib/app/modules/progress//progress_controller.dart').
+ - 'ProgressController/*2*/' is from 'package:meal_mentor_ai/app/modules/progress/progress_controller.dart' ('lib/app/modules/progress/progress_controller.dart').
+          controller: controller,
+                      ^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:9:8: Error: 'FirebaseService' isn't a type.
+  late FirebaseService _firebaseService;
+       ^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:25:8: Error: 'WorkoutDayModel' isn't a type.
+  late WorkoutDayModel currentDay;
+       ^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:33:33: Error: 'FirebaseService' isn't a type.
+    _firebaseService = Get.find<FirebaseService>();
+                                ^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:38:14: Error: 'WorkoutDayModel' isn't a type.
+    required WorkoutDayModel day,
+             ^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:53:24: Error: The method 'ExerciseLogModel' isn't defined for the type 'ActiveWorkoutController'.
+ - 'ActiveWorkoutController' is from 'package:meal_mentor_ai/app/modules/active_workout_progress//active_workout_controller.dart' ('lib/app/modules/active_workout_progress//active_workout_controller.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'ExerciseLogModel'.
+      exerciseLogs.add(ExerciseLogModel(
+                       ^^^^^^^^^^^^^^^^
+lib/app/modules/active_workout_progress//active_workout_controller.dart:118:21: Error: The method 'SetLogModel' isn't defined for the type 'ActiveWorkoutController'.
+ - 'ActiveWorkoutController' is from 'package:meal_mentor_ai/app/modules/active_workout_progress//active_workout_controller.dart' ('lib/app/modules/active_workout_progress//active_workout_controller.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'SetLogModel'.
+    log.setLogs.add(SetLogModel(
+                    ^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:8:8: Error: 'FirebaseService' isn't a type.
+  late FirebaseService _firebaseService;
+       ^^^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:23:33: Error: 'FirebaseService' isn't a type.
+    _firebaseService = Get.find<FirebaseService>();
+                                ^^^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:36:34: Error: 'ProgressModel' isn't a type.
+      final grouped = <int, List<ProgressModel>>{};
+                                 ^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:32:23: Error: The getter 'ProgressModel' isn't defined for the type 'ProgressController'.
+ - 'ProgressController' is from 'package:meal_mentor_ai/app/modules/progress//progress_controller.dart' ('lib/app/modules/progress//progress_controller.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'ProgressModel'.
+          .map((m) => ProgressModel.fromJson(m))
+                      ^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:105:16: Error: The getter 'weight' isn't defined for the type 'Object?'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'weight'.
+      return a.weight > b.weight ? a : b;
+               ^^^^^^
+lib/app/modules/progress//progress_controller.dart:105:27: Error: The getter 'weight' isn't defined for the type 'Object?'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'weight'.
+      return a.weight > b.weight ? a : b;
+                          ^^^^^^
+lib/app/modules/progress//progress_controller.dart:192:30: Error: 'ProgressModel' isn't a type.
+    final weeks = <int, List<ProgressModel>>{};
+                             ^^^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:204:59: Error: The getter 'totalVolume' isn't defined for the type 'Object?'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'totalVolume'.
+      totalVolume += weekLogs.fold(0, (sum, m) => sum + m.totalVolume);
+                                                          ^^^^^^^^^^^
+lib/app/modules/progress//progress_controller.dart:225:43: Error: The getter 'totalVolume' isn't defined for the type 'Object?'.
+ - 'Object' is from 'dart:core'.
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'totalVolume'.
+            (sum, metric) => sum + metric.totalVolume,
+                                          ^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command '/Users/macbookpro/development/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 5s
+Running Gradle task 'assembleDebug'...                              5.8s
+Gradle task assembleDebug failed with exit code 1

@@ -7,6 +7,7 @@ import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/theme/app_theme.dart';
 import 'app/data/services/firebase_service.dart';
+import 'app/data/services/wgerservices.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,8 @@ void main() async {
     print('✅ Firebase initialized successfully');
     Get.put(FirebaseService(), permanent: true);
     print('✅ FirebaseService initialized');
+    Get.put(WgerService(), permanent: true);
+    print('✅ WgerService initialized');
   } catch (e) {
     print('❌ Firebase initialization error: $e');
     // Only put FirebaseService if Firebase initialized successfully

@@ -1,0 +1,324 @@
+[
+  {
+    "id": 1,
+    "name": "Push Ups",
+    "description": "A classic bodyweight exercise that targets the chest, shoulders, and triceps.",
+    "category": "Strength",
+    "muscles": [
+      4,
+      2
+    ],
+    "muscle_names": [
+      "Chest",
+      "Triceps"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Beginner",
+    "gifUrl": "https://media.giphy.com/media/3o7TKSjRrfIPjeiB56/giphy.gif"
+  },
+  {
+    "id": 2,
+    "name": "Squats",
+    "description": "The king of leg exercises. Targets quads, hamstrings, and glutes.",
+    "category": "Strength",
+    "muscles": [
+      10,
+      11
+    ],
+    "muscle_names": [
+      "Legs",
+      "Glutes"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Beginner",
+    "gifUrl": "https://media.giphy.com/media/1qfKN8Dt0CRdCRxz9q/giphy.gif"
+  },
+  {
+    "id": 3,
+    "name": "Lunges",
+    "description": "Unilateral leg exercise for balance and strength.",
+    "category": "Strength",
+    "muscles": [
+      10,
+      11
+    ],
+    "muscle_names": [
+      "Legs",
+      "Glutes"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Beginner",
+    "gifUrl": "https://media.giphy.com/media/l3q2Q3sUEkEyD1c28/giphy.gif"
+  },
+  {
+    "id": 4,
+    "name": "Plank",
+    "description": "Isometric core exercise.",
+    "category": "Strength",
+    "muscles": [
+      6,
+      13
+    ],
+    "muscle_names": [
+      "Abs",
+      "Core"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Beginner",
+    "gifUrl": "https://media.giphy.com/media/xT5LMvQ6H5W5W5W5W5/giphy.gif"
+  },
+  {
+    "id": 5,
+    "name": "Jumping Jacks",
+    "description": "Full body cardio warmup.",
+    "category": "Cardio",
+    "muscles": [
+      15
+    ],
+    "muscle_names": [
+      "Cardio",
+      "Full Body"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Beginner",
+    "gifUrl": "https://media.giphy.com/media/l0HlO3BJ8LALu48Ny/giphy.gif"
+  },
+  {
+    "id": 6,
+    "name": "Burpees",
+    "description": "High intensity full body exercise.",
+    "category": "Cardio",
+    "muscles": [
+      15
+    ],
+    "muscle_names": [
+      "Cardio",
+      "Full Body"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/26tP3M3i03qgLoz6M/giphy.gif"
+  },
+  {
+    "id": 7,
+    "name": "Dumbbell Bench Press",
+    "description": "Chest press using dumbbells.",
+    "category": "Strength",
+    "muscles": [
+      4,
+      2
+    ],
+    "muscle_names": [
+      "Chest",
+      "Triceps"
+    ],
+    "equipment": [
+      3
+    ],
+    "equipment_names": [
+      "Dumbbell"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/3o7qE5866bLg4GSxG0/giphy.gif"
+  },
+  {
+    "id": 8,
+    "name": "Dumbbell Row",
+    "description": "Back exercise for lats and biceps.",
+    "category": "Strength",
+    "muscles": [
+      12,
+      1
+    ],
+    "muscle_names": [
+      "Back",
+      "Biceps"
+    ],
+    "equipment": [
+      3
+    ],
+    "equipment_names": [
+      "Dumbbell"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif"
+  },
+  {
+    "id": 9,
+    "name": "Shoulder Press",
+    "description": "Overhead press for shoulder strength.",
+    "category": "Strength",
+    "muscles": [
+      2
+    ],
+    "muscle_names": [
+      "Shoulders"
+    ],
+    "equipment": [
+      3
+    ],
+    "equipment_names": [
+      "Dumbbell"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/3o7qE5866bLg4GSxG0/giphy.gif"
+  },
+  {
+    "id": 10,
+    "name": "Bicep Curls",
+    "description": "Isolation exercise for biceps.",
+    "category": "Strength",
+    "muscles": [
+      1
+    ],
+    "muscle_names": [
+      "Biceps"
+    ],
+    "equipment": [
+      3
+    ],
+    "equipment_names": [
+      "Dumbbell"
+    ],
+    "difficulty": "Beginner",
+    "gifUrl": "https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif"
+  },
+  {
+    "id": 11,
+    "name": "Tricep Dips",
+    "description": "Bodyweight exercise for triceps.",
+    "category": "Strength",
+    "muscles": [
+      5
+    ],
+    "muscle_names": [
+      "Triceps"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/3o7TKSjRrfIPjeiB56/giphy.gif"
+  },
+  {
+    "id": 12,
+    "name": "Mountain Climbers",
+    "description": "Cardio and core exercise.",
+    "category": "Cardio",
+    "muscles": [
+      6,
+      15
+    ],
+    "muscle_names": [
+      "Abs",
+      "Cardio"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/l0HlO3BJ8LALu48Ny/giphy.gif"
+  },
+  {
+    "id": 13,
+    "name": "Deadlift",
+    "description": "Compound lift for posterior chain.",
+    "category": "Strength",
+    "muscles": [
+      12,
+      10,
+      11
+    ],
+    "muscle_names": [
+      "Back",
+      "Legs",
+      "Glutes"
+    ],
+    "equipment": [
+      2
+    ],
+    "equipment_names": [
+      "Barbell"
+    ],
+    "difficulty": "Advanced",
+    "gifUrl": "https://media.giphy.com/media/pS6qtLCz1I1X2/giphy.gif"
+  },
+  {
+    "id": 14,
+    "name": "Pull Ups",
+    "description": "Upper body pulling strength.",
+    "category": "Strength",
+    "muscles": [
+      12,
+      1
+    ],
+    "muscle_names": [
+      "Back",
+      "Biceps"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Advanced",
+    "gifUrl": "https://media.giphy.com/media/3o7qDEq2bMbcbPRQ2c/giphy.gif"
+  },
+  {
+    "id": 15,
+    "name": "Leg Raise",
+    "description": "Lower abs exercise.",
+    "category": "Strength",
+    "muscles": [
+      6
+    ],
+    "muscle_names": [
+      "Abs"
+    ],
+    "equipment": [
+      7
+    ],
+    "equipment_names": [
+      "Body Weight"
+    ],
+    "difficulty": "Intermediate",
+    "gifUrl": "https://media.giphy.com/media/xT5LMvQ6H5W5W5W5W5/giphy.gif"
+  }
+]

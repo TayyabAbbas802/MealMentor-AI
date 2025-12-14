@@ -11,6 +11,8 @@ class FirebaseService extends GetxService {
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   bool get isLoggedIn => _auth.currentUser != null;
 
+  // ============ AUTHENTICATION METHODS ============
+
   // Sign up with email and password
   Future<UserCredential?> signUpWithEmailPassword({
     required String email,
@@ -91,7 +93,7 @@ class FirebaseService extends GetxService {
         'age': 0,
         'weight': 0.0,
         'height': 0.0,
-        'goal': '',
+        'goal': 'maintenance', // Default goal for exercise system
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -125,7 +127,6 @@ class FirebaseService extends GetxService {
       return null;
     }
   }
-
 
   // Update user document
   Future<void> updateUserDocument({
@@ -208,6 +209,8 @@ class FirebaseService extends GetxService {
     }
   }
 
+  // ============ NUTRITION METHODS ============
+
   // Save meal to Firestore
   Future<void> saveMeal({
     required String userId,
@@ -275,5 +278,393 @@ class FirebaseService extends GetxService {
     }
 
     return query.orderBy('createdAt', descending: true).snapshots();
+  }
+
+  // ============ EXERCISE SYSTEM METHODS ============
+
+  /// Create a new workout plan
+  Future<String> createWorkoutPlan({
+    required String userId,
+    required String name,
+    required String difficulty,
+    required int daysPerWeek,
+    required String goal,
+    required List<Map<String, dynamic>> daysSchedule,
+  }) async {
+    try {
+      print('Creating workout plan for user: $userId'); // Debug
+
+      final docRef = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutPlans')
+          .add({
+        'name': name,
+        'difficulty': difficulty,
+        'daysPerWeek': daysPerWeek,
+        'goal': goal,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'daysSchedule': daysSchedule,
+      });
+
+      print('Workout plan created with ID: ${docRef.id}'); // Debug
+      return docRef.id;
+    } catch (e) {
+      print('Error creating workout plan: $e'); // Debug
+      throw 'Failed to create workout plan: ${e.toString()}';
+    }
+  }
+
+  /// Get all workout plans for user
+  Future<List<Map<String, dynamic>>> getWorkoutPlans(String userId) async {
+    try {
+      print('Fetching workout plans for user: $userId'); // Debug
+
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutPlans')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final plans = snapshot.docs
+          .map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+      })
+          .toList();
+
+      print('Retrieved ${plans.length} workout plans'); // Debug
+      return plans;
+    } catch (e) {
+      print('Error getting workout plans: $e'); // Debug
+      throw 'Failed to get workout plans: ${e.toString()}';
+    }
+  }
+
+  /// Get specific workout plan
+  Future<Map<String, dynamic>?> getWorkoutPlan(
+      String userId,
+      String planId,
+      ) async {
+    try {
+      print('Fetching workout plan: $planId'); // Debug
+
+      final doc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutPlans')
+          .doc(planId)
+          .get();
+
+      if (doc.exists) {
+        return {
+          'id': doc.id,
+          ...doc.data()!,
+        };
+      }
+      return null;
+    } catch (e) {
+      print('Error getting workout plan: $e'); // Debug
+      throw 'Failed to get workout plan: ${e.toString()}';
+    }
+  }
+
+  /// Update workout plan
+  Future<void> updateWorkoutPlan({
+    required String userId,
+    required String planId,
+    required Map<String, dynamic> updateData,
+  }) async {
+    try {
+      updateData['updatedAt'] = FieldValue.serverTimestamp();
+
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutPlans')
+          .doc(planId)
+          .update(updateData);
+
+      print('Workout plan updated: $planId'); // Debug
+    } catch (e) {
+      print('Error updating workout plan: $e'); // Debug
+      throw 'Failed to update workout plan: ${e.toString()}';
+    }
+  }
+
+  /// Delete workout plan
+  Future<void> deleteWorkoutPlan(String userId, String planId) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutPlans')
+          .doc(planId)
+          .delete();
+
+      print('Workout plan deleted: $planId'); // Debug
+    } catch (e) {
+      print('Error deleting workout plan: $e'); // Debug
+      throw 'Failed to delete workout plan: ${e.toString()}';
+    }
+  }
+
+  /// Log a completed workout
+  Future<String> logWorkout({
+    required String userId,
+    required String planId,
+    required int dayIndex,
+    required List<Map<String, dynamic>> exerciseLogs,
+    required int durationMinutes,
+  }) async {
+    try {
+      print('Logging workout for user: $userId'); // Debug
+
+      final docRef = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutLogs')
+          .add({
+        'planId': planId,
+        'date': FieldValue.serverTimestamp(),
+        'dayIndex': dayIndex,
+        'exerciseLogs': exerciseLogs,
+        'durationMinutes': durationMinutes,
+        'isCompleted': true,
+      });
+
+      print('Workout logged with ID: ${docRef.id}'); // Debug
+      return docRef.id;
+    } catch (e) {
+      print('Error logging workout: $e'); // Debug
+      throw 'Failed to log workout: ${e.toString()}';
+    }
+  }
+
+  /// Get workout logs for a specific plan
+  Future<List<Map<String, dynamic>>> getWorkoutLogs(
+      String userId,
+      String planId,
+      ) async {
+    try {
+      print('Fetching workout logs for plan: $planId'); // Debug
+
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutLogs')
+          .where('planId', isEqualTo: planId)
+          .orderBy('date', descending: true)
+          .get();
+
+      final logs = snapshot.docs
+          .map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+      })
+          .toList();
+
+      print('Retrieved ${logs.length} workout logs'); // Debug
+      return logs;
+    } catch (e) {
+      print('Error getting workout logs: $e'); // Debug
+      throw 'Failed to get workout logs: ${e.toString()}';
+    }
+  }
+
+  /// Get logs between date range
+  Future<List<Map<String, dynamic>>> getWorkoutLogsDateRange({
+    required String userId,
+    required String planId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      print('Fetching workout logs from $startDate to $endDate'); // Debug
+
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('workoutLogs')
+          .where('planId', isEqualTo: planId)
+          .where('date', isGreaterThanOrEqualTo: startDate)
+          .where('date', isLessThanOrEqualTo: endDate)
+          .orderBy('date', descending: true)
+          .get();
+
+      final logs = snapshot.docs
+          .map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+      })
+          .toList();
+
+      return logs;
+    } catch (e) {
+      print('Error getting workout logs: $e'); // Debug
+      throw 'Failed to get workout logs: ${e.toString()}';
+    }
+  }
+
+  /// Stream workout logs (real-time updates)
+  Stream<List<Map<String, dynamic>>> streamWorkoutLogs(
+      String userId,
+      String planId,
+      ) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('workoutLogs')
+        .where('planId', isEqualTo: planId)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => {
+      'id': doc.id,
+      ...doc.data(),
+    })
+        .toList());
+  }
+
+  /// Log progress metric
+  Future<void> logProgressMetric({
+    required String userId,
+    required int exerciseWgerId,
+    required String exerciseName,
+    required double weight,
+    required int reps,
+    required int sets,
+  }) async {
+    try {
+      final totalVolume = weight * reps * sets;
+
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('progressMetrics')
+          .add({
+        'date': FieldValue.serverTimestamp(),
+        'exerciseWgerId': exerciseWgerId,
+        'exerciseName': exerciseName,
+        'weight': weight,
+        'reps': reps,
+        'sets': sets,
+        'totalVolume': totalVolume,
+      });
+
+      print('Progress metric logged for: $exerciseName'); // Debug
+    } catch (e) {
+      print('Error logging progress metric: $e'); // Debug
+      throw 'Failed to log progress metric: ${e.toString()}';
+    }
+  }
+
+  /// Get progress metrics for an exercise
+  Future<List<Map<String, dynamic>>> getExerciseProgress(
+      String userId,
+      int exerciseWgerId,
+      ) async {
+    try {
+      print('Fetching progress for exercise: $exerciseWgerId'); // Debug
+
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('progressMetrics')
+          .where('exerciseWgerId', isEqualTo: exerciseWgerId)
+          .orderBy('date', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+      })
+          .toList();
+    } catch (e) {
+      print('Error getting exercise progress: $e'); // Debug
+      throw 'Failed to get exercise progress: ${e.toString()}';
+    }
+  }
+
+  /// Get all progress metrics
+  Future<List<Map<String, dynamic>>> getAllProgressMetrics(String userId) async {
+    try {
+      print('Fetching all progress metrics'); // Debug
+
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('progressMetrics')
+          .orderBy('date', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => {
+        'id': doc.id,
+        ...doc.data(),
+      })
+          .toList();
+    } catch (e) {
+      print('Error getting progress metrics: $e'); // Debug
+      throw 'Failed to get progress metrics: ${e.toString()}';
+    }
+  }
+
+  /// Calculate workout streak
+  Future<int> getWorkoutStreak(String userId, String planId) async {
+    try {
+      final logs = await getWorkoutLogs(userId, planId);
+
+      if (logs.isEmpty) return 0;
+
+      int streak = 0;
+      DateTime today = DateTime.now();
+
+      for (int i = 0; i < logs.length; i++) {
+        final logDate = (logs[i]['date'] as Timestamp).toDate();
+        final expectedDate = today.subtract(Duration(days: i));
+
+        // Check if log is within expected date (allowing for same day)
+        if (logDate.year == expectedDate.year &&
+            logDate.month == expectedDate.month &&
+            logDate.day == expectedDate.day) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+
+      print('Current workout streak: $streak days'); // Debug
+      return streak;
+    } catch (e) {
+      print('Error calculating streak: $e'); // Debug
+      return 0;
+    }
+  }
+
+  /// Get calendar data for heatmap
+  Future<Map<DateTime, int>> getCalendarData(
+      String userId,
+      String planId,
+      ) async {
+    try {
+      final logs = await getWorkoutLogs(userId, planId);
+      final calendarData = <DateTime, int>{};
+
+      for (var log in logs) {
+        final logDate = (log['date'] as Timestamp).toDate();
+        final dateKey = DateTime(logDate.year, logDate.month, logDate.day);
+
+        calendarData[dateKey] = (calendarData[dateKey] ?? 0) + 1;
+      }
+
+      return calendarData;
+    } catch (e) {
+      print('Error getting calendar data: $e'); // Debug
+      return {};
+    }
   }
 }

@@ -1,0 +1,96 @@
+.
+├── app
+│   ├── data
+│   │   ├── models
+│   │   │   ├── exercise_model.dart
+│   │   │   ├── meal_model.dart
+│   │   │   ├── nutrition_model.dart
+│   │   │   ├── progress_model.dart
+│   │   │   ├── user_info
+│   │   │   │   ├── user_info_binding.dart
+│   │   │   │   ├── user_info_controller.dart
+│   │   │   │   └── user_info_view.dart
+│   │   │   ├── user_info_model.dart
+│   │   │   ├── user_model.dart
+│   │   │   ├── workout_log_model.dart
+│   │   │   └── workout_plan_model.dart
+│   │   └── services
+│   │       ├── firebase_service.dart
+│   │       └── wgerservices.dart
+│   ├── modules
+│   │   ├── Tutorial
+│   │   │   ├── tutorial_binding.dart
+│   │   │   ├── tutorial_controller.dart
+│   │   │   └── tutorial_view.dart
+│   │   ├── active_workout_progress
+│   │   │   ├── active_workout_controller.dart
+│   │   │   └── active_workout_screen.dart
+│   │   ├── auth
+│   │   │   ├── auth_binding.dart
+│   │   │   ├── auth_controller.dart
+│   │   │   ├── login_view.dart
+│   │   │   └── signup_view.dart
+│   │   ├── chatbot
+│   │   │   ├── chatbot_binding.dart
+│   │   │   ├── chatbot_controller.dart
+│   │   │   ├── chatbot_view.dart
+│   │   │   └── list_models.dart
+│   │   ├── diet_plan
+│   │   │   ├── diet_plan_binding.dart
+│   │   │   ├── diet_plan_controller.dart
+│   │   │   └── diet_plan_view.dart
+│   │   ├── exercise
+│   │   │   ├── exercise_binding.dart
+│   │   │   ├── exercise_controller.dart
+│   │   │   └── exercise_view.dart
+│   │   ├── home
+│   │   │   ├── home_binding.dart
+│   │   │   ├── home_controller.dart
+│   │   │   └── home_view.dart
+│   │   ├── meal_scan
+│   │   │   ├── meal_scan_binding.dart
+│   │   │   ├── meal_scan_controller.dart
+│   │   │   └── meal_scan_view.dart
+│   │   ├── nutrition
+│   │   │   ├── nutrition_binding.dart
+│   │   │   ├── nutrition_controller.dart
+│   │   │   └── nutrition_view.dart
+│   │   ├── onboarding
+│   │   │   ├── onboarding_binding.dart
+│   │   │   ├── onboarding_controller.dart
+│   │   │   └── onboarding_view.dart
+│   │   ├── profile
+│   │   │   ├── profile_binding.dart
+│   │   │   ├── profile_controller.dart
+│   │   │   └── profile_view.dart
+│   │   ├── progress
+│   │   │   ├── progress_controller.dart
+│   │   │   └── progress_dashboard.dart
+│   │   ├── splash
+│   │   │   ├── splash_binding.dart
+│   │   │   ├── splash_controller.dart
+│   │   │   └── splash_view.dart
+│   │   ├── user_info
+│   │   │   └── user_info_bimding.dart
+│   │   └── workout_plam
+│   │       ├── weekly_plan_screen.dart
+│   │       └── workout_plan_controller.dart
+│   ├── routes
+│   │   ├── app_pages.dart
+│   │   └── app_routes.dart
+│   ├── theme
+│   │   ├── app_colors.dart
+│   │   └── app_theme.dart
+│   └── widgets
+│       ├── custom_button.dart
+│       ├── custom_text_field.dart
+│       ├── day_card_widget.dart
+│       ├── exercise_card_widget.dart
+│       ├── feature_card.dart
+│       ├── progress_calendar.dart
+│       └── set_timer_widget.dart
+├── file_structure.txt
+├── firebase_options.dart
+└── main.dart
+
+25 directories, 69 files

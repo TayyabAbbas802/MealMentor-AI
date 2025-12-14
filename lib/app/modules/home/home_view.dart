@@ -9,313 +9,389 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MealMentor AI'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDailyProgressSection(),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader('Quick Actions'),
+                  const SizedBox(height: 16),
+                  _buildQuickActionsGrid(),
+                  const SizedBox(height: 32),
+                  _buildSectionHeader('Recent Meals'),
+                  const SizedBox(height: 16),
+                  _buildRecentMealsList(),
+                  const SizedBox(height: 100), // Bottom padding
+                ],
+              ),
+            ),
           ),
         ],
-      ),
-      drawer: _buildDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Welcome back!',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Let's track your nutrition today",
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 32),
-            _buildQuickStats(),
-            const SizedBox(height: 32),
-            const Text(
-              'Quick Actions',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildQuickActions(),
-            const SizedBox(height: 32),
-            const Text(
-              'Recent Meals',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildRecentMeals(),
-          ],
-        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: controller.navigateToMealScan,
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.camera_alt),
-        label: const Text('Scan Meal'),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.camera_alt_rounded),
+        label: const Text(
+          'Scan Meal',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
-  Widget _buildDrawer() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          Obx(() => DrawerHeader(
-            decoration: const BoxDecoration(
-              gradient: AppColors.primaryGradient,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColors.textLight,
-                  child: Icon(
-                    Icons.person,
-                    size: 40,
-                    color: AppColors.primary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  controller.userName,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  controller.userEmail,
-                  style: const TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          )),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () => Get.back(),
-          ),
-          ListTile(
-            leading: const Icon(Icons.restaurant),
-            title: const Text('Diet Plan'),
-            onTap: controller.navigateToDietPlan,
-          ),
-          ListTile(
-            leading: const Icon(Icons.fitness_center),
-            title: const Text('Exercise'),
-            onTap: controller.navigateToExercise,
-          ),
-          ListTile(
-            leading: const Icon(Icons.bar_chart),
-            title: const Text('Nutrition Stats'),
-            onTap: controller.navigateToNutrition,
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            onTap: controller.navigateToProfile,
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),
-            onTap: () {
-              Get.back();
-              controller.logout();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      expandedHeight: 120.0,
+      floating: true,
+      pinned: true,
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+        title: Obx(() => Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              "Today's Overview",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            Text(
+              'Hello, ${controller.userName.split(' ')[0]} 👋',
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem('Calories', '1,450', '/ 2,000', Icons.local_fire_department),
-                _buildStatItem('Protein', '65g', '/ 150g', Icons.egg),
-                _buildStatItem('Water', '6', '/ 8 cups', Icons.water_drop),
-              ],
+            const Text(
+              "Let's crush your goals today!",
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
-        ),
+        )),
       ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, String target, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 32),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.border.withOpacity(0.5)),
           ),
-        ),
-        Text(
-          target,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppColors.textPrimary,
+          child: IconButton(
+            icon: const Icon(Icons.person_outline_rounded, color: AppColors.textPrimary),
+            onPressed: controller.navigateToProfile,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textPrimary,
+        letterSpacing: -0.5,
+      ),
+    );
+  }
+
+  Widget _buildDailyProgressSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: AppColors.darkGradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowColorDark,
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Calories Today',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '1,450 / 2,000',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  color: AppColors.primary,
+                  size: 32,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: 0.72,
+              backgroundColor: Colors.white.withOpacity(0.1),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              minHeight: 8,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildMacroItem('Protein', '65g', '150g', AppColors.blueGradient),
+              _buildMacroItem('Carbs', '120g', '200g', AppColors.orangeGradient),
+              _buildMacroItem('Fat', '45g', '70g', AppColors.purpleGradient),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacroItem(String label, String value, String target, Gradient gradient) {
+    return Column(
+      children: [
+        Container(
+          height: 4,
+          width: 40,
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionsGrid() {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
+      childAspectRatio: 1.1,
       children: [
         _buildActionCard(
-          'Scan Meal',
-          Icons.camera_alt,
-          AppColors.primary,
-          controller.navigateToMealScan,
-        ),
-        _buildActionCard(
           'Diet Plan',
-          Icons.restaurant_menu,
+          'Meal recommendations',
+          Icons.restaurant_menu_rounded,
           AppColors.secondary,
           controller.navigateToDietPlan,
         ),
         _buildActionCard(
           'Exercise',
-          Icons.fitness_center,
-          const Color(0xFF9C27B0),
+          'Workouts & Plans',
+          Icons.fitness_center_rounded,
+          AppColors.primary,
           controller.navigateToExercise,
         ),
         _buildActionCard(
           'Nutrition',
-          Icons.bar_chart,
-          const Color(0xFF2196F3),
+          'Detailed Analysis',
+          Icons.pie_chart_rounded,
+          AppColors.accent,
           controller.navigateToNutrition,
+        ),
+        _buildActionCard(
+          'Profile',
+          'Settings & Goals',
+          Icons.person_rounded,
+          AppColors.info,
+          controller.navigateToProfile,
         ),
       ],
     );
   }
 
-  Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Card(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
+  Widget _buildActionCard(
+      String title,
+      String subtitle,
+      IconData icon,
+      Color color,
+      VoidCallback onTap,
+      ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppColors.border.withOpacity(0.5)),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.shadowColor,
+                blurRadius: 10,
+                offset: Offset(0, 4),
               ),
-              child: Icon(icon, size: 40, color: color),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 28),
               ),
-            ),
-          ],
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildRecentMeals() {
-    return ListView.builder(
+  Widget _buildRecentMealsList() {
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: 3,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border.withOpacity(0.5)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Icon(Icons.fastfood, color: Colors.white, size: 30),
+                ),
               ),
-              child: const Icon(Icons.restaurant, color: AppColors.primary),
-            ),
-            title: Text('Meal ${index + 1}'),
-            subtitle: const Text('450 cal • 2 hours ago'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Healthy Salad Bowl ${index + 1}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time_rounded, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
+                        const Text(
+                          'Lunch • 450 kcal',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                onPressed: () {},
+              ),
+            ],
           ),
         );
       },

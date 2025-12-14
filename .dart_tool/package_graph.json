@@ -19,6 +19,7 @@
         "get",
         "google_generative_ai",
         "google_sign_in",
+        "google_sign_in_ios",
         "image_picker",
         "intl",
         "shared_preferences"
@@ -51,6 +52,14 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "google_sign_in_ios",
+      "version": "5.9.0",
+      "dependencies": [
+        "flutter",
+        "google_sign_in_platform_interface"
       ]
     },
     {
@@ -301,6 +310,14 @@
       ]
     },
     {
+      "name": "google_sign_in_platform_interface",
+      "version": "2.5.0",
+      "dependencies": [
+        "flutter",
+        "plugin_platform_interface"
+      ]
+    },
+    {
       "name": "facebook_auth_desktop",
       "version": "1.0.3",
       "dependencies": [
@@ -338,22 +355,6 @@
         "google_sign_in_platform_interface",
         "http",
         "web"
-      ]
-    },
-    {
-      "name": "google_sign_in_platform_interface",
-      "version": "2.5.0",
-      "dependencies": [
-        "flutter",
-        "plugin_platform_interface"
-      ]
-    },
-    {
-      "name": "google_sign_in_ios",
-      "version": "5.9.0",
-      "dependencies": [
-        "flutter",
-        "google_sign_in_platform_interface"
       ]
     },
     {
@@ -738,6 +739,13 @@
       ]
     },
     {
+      "name": "plugin_platform_interface",
+      "version": "2.1.8",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
       "name": "flutter_secure_storage",
       "version": "9.2.4",
       "dependencies": [
@@ -762,13 +770,6 @@
       "version": "0.0.0",
       "dependencies": [
         "flutter"
-      ]
-    },
-    {
-      "name": "plugin_platform_interface",
-      "version": "2.1.8",
-      "dependencies": [
-        "meta"
       ]
     },
     {

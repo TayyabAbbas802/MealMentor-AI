@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 import '../../routes/app_routes.dart';
+import '../../data/services/firebase_service.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -96,13 +97,13 @@ class AuthController extends GetxController {
       final user = userCredential.user!;
       await user.updateDisplayName(nameController.text.trim());
 
-      await _firestore.collection('users').doc(user.uid).set({
-        'uid': user.uid,
-        'name': nameController.text.trim(),
-        'email': emailController.text.trim(),
-        'profileComplete': false,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      // Use FirebaseService to create user document consistently
+      final firebaseService = Get.find<FirebaseService>();
+      await firebaseService.createUserDocument(
+        userId: user.uid,
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+      );
 
       Get.offAllNamed(AppRoutes.USER_INFO);
 
