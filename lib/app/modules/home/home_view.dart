@@ -83,22 +83,6 @@ class HomeView extends GetView<HomeController> {
           ],
         )),
       ),
-      actions: [
-        Builder(
-          builder: (context) => Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border.withOpacity(0.5)),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-        ),
-      ],
     );
   }
 

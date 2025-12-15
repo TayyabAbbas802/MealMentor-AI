@@ -20,6 +20,7 @@
         "google_generative_ai",
         "google_sign_in",
         "google_sign_in_ios",
+        "http",
         "image_picker",
         "intl",
         "shared_preferences"
@@ -81,6 +82,16 @@
         "google_sign_in_ios",
         "google_sign_in_platform_interface",
         "google_sign_in_web"
+      ]
+    },
+    {
+      "name": "http",
+      "version": "1.6.0",
+      "dependencies": [
+        "async",
+        "http_parser",
+        "meta",
+        "web"
       ]
     },
     {
@@ -366,13 +377,26 @@
       ]
     },
     {
-      "name": "http",
-      "version": "1.6.0",
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
+    },
+    {
+      "name": "http_parser",
+      "version": "4.1.2",
       "dependencies": [
-        "async",
-        "http_parser",
-        "meta",
-        "web"
+        "collection",
+        "source_span",
+        "string_scanner",
+        "typed_data"
+      ]
+    },
+    {
+      "name": "async",
+      "version": "2.13.0",
+      "dependencies": [
+        "collection",
+        "meta"
       ]
     },
     {
@@ -660,11 +684,6 @@
       ]
     },
     {
-      "name": "web",
-      "version": "1.1.1",
-      "dependencies": []
-    },
-    {
       "name": "sky_engine",
       "version": "0.0.0",
       "dependencies": []
@@ -680,14 +699,6 @@
       "name": "characters",
       "version": "1.4.0",
       "dependencies": []
-    },
-    {
-      "name": "async",
-      "version": "2.13.0",
-      "dependencies": [
-        "collection",
-        "meta"
-      ]
     },
     {
       "name": "leak_tracker_testing",
@@ -781,13 +792,10 @@
       ]
     },
     {
-      "name": "http_parser",
-      "version": "4.1.2",
+      "name": "typed_data",
+      "version": "1.4.0",
       "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
+        "collection"
       ]
     },
     {
@@ -943,13 +951,6 @@
       "dependencies": [
         "flutter",
         "flutter_secure_storage_platform_interface"
-      ]
-    },
-    {
-      "name": "typed_data",
-      "version": "1.4.0",
-      "dependencies": [
-        "collection"
       ]
     },
     {

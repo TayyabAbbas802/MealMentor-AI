@@ -337,123 +337,316 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
   Widget _buildExerciseItem(dynamic exercise, int exerciseNumber) {
     final hasGif = exercise.gifUrl != null && exercise.gifUrl.toString().isNotEmpty;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Exercise Number
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              '$exerciseNumber',
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+    return GestureDetector(
+      onTap: () => _showExerciseDetailDialog(exercise, exerciseNumber),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Exercise Number
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '$exerciseNumber',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 16),
-        // GIF/Image
-        if (hasGif)
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border.withOpacity(0.3)),
+          const SizedBox(width: 16),
+          // GIF/Image
+          if (hasGif)
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border.withOpacity(0.3)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.network(
+                exercise.gifUrl.toString(),
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Icon(Icons.fitness_center_rounded, color: AppColors.textSecondary),
+                  );
+                },
+              ),
+            )
+          else
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border.withOpacity(0.3)),
+              ),
+              child: const Center(
+                child: Icon(Icons.fitness_center_rounded, color: AppColors.textSecondary, size: 32),
+              ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Image.network(
-              exercise.gifUrl.toString(),
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.fitness_center_rounded, color: AppColors.textSecondary),
-                );
-              },
-            ),
-          )
-        else
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border.withOpacity(0.3)),
-            ),
-            child: const Center(
-              child: Icon(Icons.fitness_center_rounded, color: AppColors.textSecondary, size: 32),
+          const SizedBox(width: 16),
+          // Exercise Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  exercise.name ?? 'Unknown Exercise',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildExerciseChip(
+                      Icons.repeat_rounded,
+                      '${exercise.targetSets} sets',
+                      AppColors.primary,
+                    ),
+                    _buildExerciseChip(
+                      Icons.fitness_center_rounded,
+                      '${exercise.targetReps} reps',
+                      AppColors.intermediateOrange,
+                    ),
+                    _buildExerciseChip(
+                      Icons.timer_rounded,
+                      '${exercise.restSeconds}s rest',
+                      AppColors.flexibilityGreen,
+                    ),
+                    if (exercise.equipment != null && exercise.equipment.isNotEmpty)
+                      _buildExerciseChip(
+                        Icons.build_rounded,
+                        exercise.equipment.first,
+                        AppColors.textSecondary,
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
-        const SizedBox(width: 16),
-        // Exercise Details
+        ],
+      ),
+    );
+  }
+
+  void _showExerciseDetailDialog(dynamic exercise, int exerciseNumber) {
+    final hasGif = exercise.gifUrl != null && exercise.gifUrl.toString().isNotEmpty;
+    
+    showDialog(
+      context: Get.context!,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$exerciseNumber',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        exercise.name ?? 'Unknown Exercise',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              // Image/GIF
+              if (hasGif)
+                Container(
+                  width: double.infinity,
+                  height: 300,
+                  color: AppColors.background,
+                  child: Image.network(
+                    exercise.gifUrl.toString(),
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.fitness_center_rounded, 
+                                color: AppColors.textSecondary, size: 64),
+                            SizedBox(height: 8),
+                            Text('Image not available',
+                                style: TextStyle(color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                )
+              else
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  color: AppColors.background,
+                  child: const Center(
+                    child: Icon(Icons.fitness_center_rounded, 
+                        color: AppColors.textSecondary, size: 80),
+                  ),
+                ),
+              // Exercise Details
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Exercise Details',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildDetailRow(
+                      Icons.repeat_rounded,
+                      'Sets',
+                      '${exercise.targetSets}',
+                      AppColors.primary,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDetailRow(
+                      Icons.fitness_center_rounded,
+                      'Reps',
+                      '${exercise.targetReps}',
+                      AppColors.intermediateOrange,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDetailRow(
+                      Icons.timer_rounded,
+                      'Rest Time',
+                      '${exercise.restSeconds} seconds',
+                      AppColors.flexibilityGreen,
+                    ),
+                    if (exercise.equipment != null && exercise.equipment.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      _buildDetailRow(
+                        Icons.build_rounded,
+                        'Equipment',
+                        exercise.equipment.join(', '),
+                        AppColors.textSecondary,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                exercise.name ?? 'Unknown Exercise',
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                value,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _buildExerciseChip(
-                    Icons.repeat_rounded,
-                    '${exercise.targetSets} sets',
-                    AppColors.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildExerciseChip(
-                    Icons.fitness_center_rounded,
-                    '${exercise.targetReps} reps',
-                    AppColors.intermediateOrange,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _buildExerciseChip(
-                    Icons.timer_rounded,
-                    '${exercise.restSeconds}s rest',
-                    AppColors.flexibilityGreen,
-                  ),
-                  if (exercise.equipment != null && exercise.equipment.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    _buildExerciseChip(
-                      Icons.build_rounded,
-                      exercise.equipment.first,
-                      AppColors.textSecondary,
-                    ),
-                  ],
-                ],
               ),
             ],
           ),
         ),
       ],
     );
+
   }
 
   Widget _buildExerciseChip(IconData icon, String label, Color color) {

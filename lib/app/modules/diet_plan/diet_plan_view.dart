@@ -22,13 +22,70 @@ class DietPlanView extends GetView<DietPlanController> {
       ),
       body: Column(
         children: [
+          _buildSearchBar(),
           _buildFilterSection(),
           Expanded(
-            child: Obx(() => controller.filteredMealPlans.isEmpty
-                ? _buildEmptyState()
-                : _buildMealList()),
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return _buildLoadingState();
+              }
+              
+              if (controller.errorMessage.value.isNotEmpty) {
+                return _buildErrorState();
+              }
+              
+              if (controller.filteredMealPlans.isEmpty) {
+                return _buildEmptyState();
+              }
+              
+              return _buildMealList();
+            }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: AppColors.surface,
+      child: TextField(
+        controller: controller.searchController,
+        onChanged: controller.onSearchChanged,
+        decoration: InputDecoration(
+          hintText: 'Search for foods...',
+          prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+          suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: controller.clearSearch,
+                )
+              : controller.isSearching.value
+                  ? const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : const SizedBox()),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border.withOpacity(0.3)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          ),
+        ),
       ),
     );
   }
@@ -70,38 +127,60 @@ class DietPlanView extends GetView<DietPlanController> {
               }).toList(),
             ),
           )),
-          const SizedBox(height: 16),
-          const Text(
-            'Diet Type',
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text(
+            'Loading foods...',
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
-          Obx(() => SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: controller.dietTypes.map((type) {
-                bool isSelected = controller.selectedDietType.value == type;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(type),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) controller.selectDietType(type);
-                    },
-                    selectedColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          )),
         ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 80,
+              color: Colors.red.shade300,
+            ),
+            const SizedBox(height: 16),
+            Obx(() => Text(
+              controller.errorMessage.value,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            )),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: controller.loadDefaultFoods,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try Again'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -145,32 +224,35 @@ class DietPlanView extends GetView<DietPlanController> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                meal['type'],
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
+                            if (meal['type'] != 'All')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  meal['type'],
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              meal['time'],
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
+                            if (meal['type'] != 'All' && meal['time'].isNotEmpty)
+                              const SizedBox(width: 8),
+                            if (meal['time'].isNotEmpty)
+                              Text(
+                                meal['time'],
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ],
@@ -269,7 +351,7 @@ class DietPlanView extends GetView<DietPlanController> {
           ),
           const SizedBox(height: 16),
           const Text(
-            'No meals found',
+            'No foods found',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -278,7 +360,7 @@ class DietPlanView extends GetView<DietPlanController> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Try adjusting your filters',
+            'Try searching for a different food',
             style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,

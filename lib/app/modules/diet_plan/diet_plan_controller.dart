@@ -1,131 +1,124 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../data/services/firebase_service.dart';
+import '../../data/services/usda_service.dart';
+import '../../data/models/food_model.dart';
+import 'dart:async';
 
 class DietPlanController extends GetxController {
   final FirebaseService _firebaseService = Get.find<FirebaseService>();
+  final UsdaService _usdaService = UsdaService();
 
   final isLoading = false.obs;
+  final isSearching = false.obs;
   final selectedMealType = 'All'.obs;
   final selectedDietType = 'Balanced'.obs;
+  final searchQuery = ''.obs;
+  final searchController = TextEditingController();
 
   final List<String> mealTypes = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snacks'];
   final List<String> dietTypes = ['Balanced', 'Low Carb', 'High Protein', 'Keto', 'Vegan', 'Vegetarian'];
 
-  // Sample meal plans
-  final RxList<Map<String, dynamic>> allMealPlans = <Map<String, dynamic>>[
-    {
-      'id': '1',
-      'name': 'Oatmeal with Berries',
-      'type': 'Breakfast',
-      'calories': 350,
-      'protein': 12,
-      'carbs': 58,
-      'fat': 8,
-      'time': '8:00 AM',
-      'description': 'A nutritious breakfast to start your day',
-      'ingredients': ['Oats', 'Blueberries', 'Strawberries', 'Honey', 'Almond milk'],
-      'dietType': 'Balanced',
-    },
-    {
-      'id': '2',
-      'name': 'Grilled Chicken Salad',
-      'type': 'Lunch',
-      'calories': 450,
-      'protein': 35,
-      'carbs': 25,
-      'fat': 18,
-      'time': '1:00 PM',
-      'description': 'Light and protein-rich lunch',
-      'ingredients': ['Chicken breast', 'Mixed greens', 'Cherry tomatoes', 'Olive oil', 'Lemon'],
-      'dietType': 'High Protein',
-    },
-    {
-      'id': '3',
-      'name': 'Salmon with Vegetables',
-      'type': 'Dinner',
-      'calories': 550,
-      'protein': 40,
-      'carbs': 35,
-      'fat': 22,
-      'time': '7:00 PM',
-      'description': 'Omega-3 rich dinner option',
-      'ingredients': ['Salmon fillet', 'Broccoli', 'Carrots', 'Brown rice', 'Garlic'],
-      'dietType': 'Balanced',
-    },
-    {
-      'id': '4',
-      'name': 'Greek Yogurt with Nuts',
-      'type': 'Snacks',
-      'calories': 200,
-      'protein': 15,
-      'carbs': 18,
-      'fat': 8,
-      'time': '4:00 PM',
-      'description': 'Healthy afternoon snack',
-      'ingredients': ['Greek yogurt', 'Almonds', 'Walnuts', 'Honey'],
-      'dietType': 'High Protein',
-    },
-    {
-      'id': '5',
-      'name': 'Protein Smoothie',
-      'type': 'Breakfast',
-      'calories': 320,
-      'protein': 25,
-      'carbs': 35,
-      'fat': 10,
-      'time': '8:30 AM',
-      'description': 'Quick protein-packed breakfast',
-      'ingredients': ['Protein powder', 'Banana', 'Spinach', 'Almond butter', 'Milk'],
-      'dietType': 'High Protein',
-    },
-    {
-      'id': '6',
-      'name': 'Quinoa Buddha Bowl',
-      'type': 'Lunch',
-      'calories': 480,
-      'protein': 18,
-      'carbs': 62,
-      'fat': 16,
-      'time': '12:30 PM',
-      'description': 'Balanced vegetarian lunch',
-      'ingredients': ['Quinoa', 'Chickpeas', 'Avocado', 'Kale', 'Tahini dressing'],
-      'dietType': 'Vegan',
-    },
-    {
-      'id': '7',
-      'name': 'Keto Egg Muffins',
-      'type': 'Breakfast',
-      'calories': 280,
-      'protein': 20,
-      'carbs': 5,
-      'fat': 22,
-      'time': '7:30 AM',
-      'description': 'Low-carb breakfast option',
-      'ingredients': ['Eggs', 'Cheese', 'Bell peppers', 'Spinach', 'Bacon'],
-      'dietType': 'Keto',
-    },
-    {
-      'id': '8',
-      'name': 'Tofu Stir Fry',
-      'type': 'Dinner',
-      'calories': 420,
-      'protein': 22,
-      'carbs': 45,
-      'fat': 18,
-      'time': '7:30 PM',
-      'description': 'Plant-based protein dinner',
-      'ingredients': ['Tofu', 'Mixed vegetables', 'Soy sauce', 'Ginger', 'Brown rice'],
-      'dietType': 'Vegan',
-    },
-  ].obs;
+  // Search results from USDA API
+  final RxList<FoodItem> searchResults = <FoodItem>[].obs;
+  final RxString errorMessage = ''.obs;
 
+  Timer? _debounce;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Load some default foods on init
+    loadDefaultFoods();
+  }
+
+  @override
+  void onClose() {
+    _debounce?.cancel();
+    searchController.dispose();
+    super.onClose();
+  }
+
+  // Load default/common foods
+  Future<void> loadDefaultFoods() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      
+      final foods = await _usdaService.getCommonFoods();
+      searchResults.value = foods;
+    } catch (e) {
+      errorMessage.value = 'Failed to load foods: $e';
+      print('Error loading default foods: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Search foods with debouncing
+  void onSearchChanged(String query) {
+    searchQuery.value = query;
+
+    // Cancel previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (query.trim().isEmpty) {
+        loadDefaultFoods();
+      } else {
+        searchFoods(query);
+      }
+    });
+  }
+
+  // Search foods from USDA API
+  Future<void> searchFoods(String query) async {
+    if (query.trim().isEmpty) return;
+
+    try {
+      isSearching.value = true;
+      errorMessage.value = '';
+
+      final foods = await _usdaService.searchFoods(query, pageSize: 25);
+      
+      if (foods.isEmpty) {
+        errorMessage.value = 'No foods found for "$query"';
+      }
+      
+      searchResults.value = foods;
+    } catch (e) {
+      errorMessage.value = 'Search failed: ${e.toString().replaceAll('Exception: ', '')}';
+      print('Error searching foods: $e');
+      searchResults.clear();
+    } finally {
+      isSearching.value = false;
+    }
+  }
+
+  // Get filtered meal plans (converted from FoodItem to meal format)
   List<Map<String, dynamic>> get filteredMealPlans {
-    return allMealPlans.where((meal) {
-      bool matchesMealType = selectedMealType.value == 'All' || meal['type'] == selectedMealType.value;
-      bool matchesDietType = selectedDietType.value == 'Balanced' || meal['dietType'] == selectedDietType.value;
-      return matchesMealType && matchesDietType;
+    return searchResults.map((food) {
+      return food.toMealPlanFormat(
+        type: selectedMealType.value == 'All' ? 'All' : selectedMealType.value,
+        time: _getDefaultTime(selectedMealType.value),
+      );
     }).toList();
+  }
+
+  String _getDefaultTime(String mealType) {
+    switch (mealType) {
+      case 'Breakfast':
+        return '8:00 AM';
+      case 'Lunch':
+        return '1:00 PM';
+      case 'Dinner':
+        return '7:00 PM';
+      case 'Snacks':
+        return '4:00 PM';
+      default:
+        return '';
+    }
   }
 
   void selectMealType(String type) {
@@ -134,6 +127,12 @@ class DietPlanController extends GetxController {
 
   void selectDietType(String type) {
     selectedDietType.value = type;
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+    loadDefaultFoods();
   }
 
   void viewMealDetails(Map<String, dynamic> meal) {
@@ -188,23 +187,17 @@ class DietPlanController extends GetxController {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'Ingredients:',
+                  'Nutritional Information:',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
-                ...(meal['ingredients'] as List).map((ingredient) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.circle, size: 8),
-                      const SizedBox(width: 8),
-                      Text(ingredient),
-                    ],
-                  ),
-                )),
+                _buildNutrientRow('Energy', '${meal['calories']} kcal'),
+                _buildNutrientRow('Protein', '${meal['protein']} g'),
+                _buildNutrientRow('Carbohydrates', '${meal['carbs']} g'),
+                _buildNutrientRow('Total Fat', '${meal['fat']} g'),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -244,6 +237,28 @@ class DietPlanController extends GetxController {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildNutrientRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
