@@ -201,10 +201,13 @@ class AuthController extends GetxController {
     try {
       print("Starting Facebook login...");
 
-      // Trigger Facebook login
+      // Trigger Facebook login with public_profile only
+      // Note: 'email' permission requires Facebook App Review approval
       final LoginResult result = await FacebookAuth.instance.login(
-        permissions: ['public_profile'], // remove 'email' for now
+        permissions: ['public_profile'],
       );
+
+      print("Facebook login result status: ${result.status}");
 
       // Check login status
       switch (result.status) {
@@ -217,27 +220,20 @@ class AuthController extends GetxController {
             return;
           }
 
+          print("Access token received: ${accessToken.token.substring(0, 20)}...");
+
           // Create Firebase credential
           final OAuthCredential facebookCredential =
-          FacebookAuthProvider.credential(accessToken.token);
+              FacebookAuthProvider.credential(accessToken.token);
 
           // Sign in with Firebase
           UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(facebookCredential);
+              await FirebaseAuth.instance.signInWithCredential(facebookCredential);
 
           print("Firebase sign-in successful: ${userCredential.user?.uid}");
-          Get.snackbar("Success", "Logged in with Facebook");
-
-          // Check if the user is new
-          bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
-
-          if (isNewUser) {
-            print("New user detected, navigating to USERINFO screen");
-            Get.offAllNamed('/userinfo'); // replace with your actual route
-          } else {
-            print("Existing user, navigating to HOME screen");
-            Get.offAllNamed('/home'); // replace with your actual route
-          }
+          
+          // Use the existing _handleSocialSignIn method for consistency
+          await _handleSocialSignIn(userCredential);
           break;
 
         case LoginStatus.cancelled:
@@ -250,14 +246,31 @@ class AuthController extends GetxController {
           Get.snackbar("Error", result.message ?? "Facebook login failed");
           break;
 
+        case LoginStatus.operationInProgress:
+          print("Facebook login operation already in progress");
+          // Don't show error, just ignore duplicate calls
+          break;
+
         default:
           print("Unknown Facebook login status: ${result.status}");
-          Get.snackbar("Error", "Unknown login error");
+          Get.snackbar("Error", "Unknown login error: ${result.status}");
       }
     } catch (e, stacktrace) {
       print("Exception during Facebook login: $e");
       print(stacktrace);
-      Get.snackbar("Error", "Failed to login with Facebook");
+      
+      // More specific error messages
+      if (e.toString().contains('invalid-credential') || 
+          e.toString().contains('Malformed access token')) {
+        Get.snackbar(
+          "Facebook Login Error",
+          "Facebook authentication failed. Please try again or use a different login method.",
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+        );
+      } else {
+        Get.snackbar("Error", "Failed to login with Facebook");
+      }
     }
   }
 

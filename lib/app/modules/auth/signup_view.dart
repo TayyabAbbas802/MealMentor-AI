@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../theme/app_colors.dart';
@@ -343,13 +344,16 @@ class SignupView extends GetView<AuthController> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // Social Login Buttons
+                    // Social Login Buttons (Platform-specific)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildSocialButton(icon: 'assets/icons/google.svg', onPressed: controller.signInWithGoogle),
-                        const SizedBox(width: 24),
-                        _buildSocialButton(icon: 'assets/icons/facebook.svg', onPressed: controller.signInWithFacebook),
+                        // Show Facebook only on Android
+                        if (!Platform.isIOS) ...[
+                          const SizedBox(width: 24),
+                          _buildSocialButton(icon: 'assets/icons/facebook.svg', onPressed: controller.signInWithFacebook),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 24),

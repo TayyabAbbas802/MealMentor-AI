@@ -9,6 +9,7 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildDrawer(),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -83,16 +84,18 @@ class HomeView extends GetView<HomeController> {
         )),
       ),
       actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border.withOpacity(0.5)),
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.person_outline_rounded, color: AppColors.textPrimary),
-            onPressed: controller.navigateToProfile,
+        Builder(
+          builder: (context) => Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.border.withOpacity(0.5)),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            ),
           ),
         ),
       ],
@@ -395,6 +398,144 @@ class HomeView extends GetView<HomeController> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      child: Column(
+        children: [
+          // User Header with Gradient
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(top: 60, bottom: 24, left: 20, right: 20),
+            decoration: const BoxDecoration(
+              gradient: AppColors.primaryGradient,
+            ),
+            child: Obx(() => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_rounded,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  controller.userName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  controller.userEmail,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            )),
+          ),
+          
+          // Navigation Items
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _buildDrawerItem(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: 'Diet Plan',
+                  color: AppColors.secondary,
+                  onTap: () {
+                    Get.back(); // Close drawer
+                    controller.navigateToDietPlan();
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.fitness_center_rounded,
+                  title: 'Exercise',
+                  color: AppColors.primary,
+                  onTap: () {
+                    Get.back();
+                    controller.navigateToExercise();
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.pie_chart_rounded,
+                  title: 'Nutrition',
+                  color: AppColors.accent,
+                  onTap: () {
+                    Get.back();
+                    controller.navigateToNutrition();
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.person_rounded,
+                  title: 'Profile',
+                  color: AppColors.info,
+                  onTap: () {
+                    Get.back();
+                    controller.navigateToProfile();
+                  },
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Divider(),
+                ),
+                _buildDrawerItem(
+                  icon: Icons.logout_rounded,
+                  title: 'Logout',
+                  color: AppColors.error,
+                  onTap: () {
+                    Get.back(); // Close drawer
+                    controller.showLogoutConfirmation();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: color, size: 24),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
     );
   }
 }

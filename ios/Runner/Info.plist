@@ -45,5 +45,41 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Google Sign-In Configuration -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.764623398624-nqqstsojo7aovskqcv41e1cs7iqp15pr</string>
+			</array>
+		</dict>
+		<!-- Facebook URL Scheme -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb862289436342000</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Facebook Configuration -->
+	<key>FacebookAppID</key>
+	<string>862289436342000</string>
+	<key>FacebookDisplayName</key>
+	<string>MealMentor AI</string>
+	<key>FacebookClientToken</key>
+	<string>ed4211ceacbe76db143b703091645440</string>
+	<!-- LSApplicationQueriesSchemes for Facebook SDK -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+	</array>
 </dict>
 </plist>
