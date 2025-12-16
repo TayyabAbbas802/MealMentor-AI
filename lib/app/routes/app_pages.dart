@@ -22,6 +22,8 @@ import '../modules/exercise/exercise_binding.dart';
 import '../modules/exercise/exercise_view.dart' as exercise;  // ✅ FIX: Add alias to avoid conflict
 import '../modules/profile/profile_binding.dart';
 import '../modules/profile/profile_view.dart';
+import '../modules/settings/settings_binding.dart';
+import '../modules/settings/settings_view.dart';
 import '../modules/Tutorial/tutorial_binding.dart';
 import '../modules/Tutorial/tutorial_view.dart';
 
@@ -138,6 +140,13 @@ class AppPages {
       name: AppRoutes.PROFILE,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
+      transition: Transition.rightToLeft,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+    GetPage(
+      name: AppRoutes.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),
     ),

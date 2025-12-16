@@ -14,6 +14,7 @@ class ProfileController extends GetxController {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final ageController = TextEditingController();
+  final genderController = TextEditingController();
   final weightController = TextEditingController();
   final heightController = TextEditingController();
   final goalController = TextEditingController();
@@ -53,6 +54,7 @@ class ProfileController extends GetxController {
     nameController.text = user.name;
     emailController.text = user.email;
     ageController.text = user.age.toString();
+    genderController.text = user.gender;
     weightController.text = user.weight.toString();
     heightController.text = user.height.toString();
     goalController.text = user.goal;
@@ -75,6 +77,7 @@ class ProfileController extends GetxController {
       Map<String, dynamic> updateData = {
         'name': nameController.text.trim(),
         'age': int.tryParse(ageController.text.trim()) ?? 0,
+        'gender': genderController.text.trim(),
         'weight': double.tryParse(weightController.text.trim()) ?? 0.0,
         'height': double.tryParse(heightController.text.trim()) ?? 0.0,
         'goal': goalController.text.trim(),
@@ -198,6 +201,10 @@ class ProfileController extends GetxController {
     );
   }
 
+  void navigateToSettings() {
+    Get.toNamed(AppRoutes.SETTINGS);
+  }
+
   double get bmi {
     if (currentUser.value == null) return 0.0;
     double weight = currentUser.value!.weight;
@@ -221,6 +228,7 @@ class ProfileController extends GetxController {
     nameController.dispose();
     emailController.dispose();
     ageController.dispose();
+    genderController.dispose();
     weightController.dispose();
     heightController.dispose();
     goalController.dispose();

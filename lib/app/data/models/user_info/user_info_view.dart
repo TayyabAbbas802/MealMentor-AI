@@ -59,6 +59,18 @@ class UserInfoView extends GetView<UserInfoController> {
                 _buildProgressIndicator(),
                 const SizedBox(height: 32),
 
+                // Age Input
+                _buildSectionTitle('Age'),
+                const SizedBox(height: 12),
+                _buildAgeInput(),
+                const SizedBox(height: 24),
+
+                // Gender Selection
+                _buildSectionTitle('Gender'),
+                const SizedBox(height: 12),
+                _buildGenderSelection(),
+                const SizedBox(height: 24),
+
                 // Weight Input
                 _buildSectionTitle('Weight'),
                 const SizedBox(height: 12),
@@ -97,15 +109,15 @@ class UserInfoView extends GetView<UserInfoController> {
       children: [
         Expanded(
           child: LinearProgressIndicator(
-            value: 0.8,
-            backgroundColor: Colors.grey,
+            value: 0.6,
+            backgroundColor: Colors.grey[300],
             valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
             minHeight: 6,
           ),
         ),
         const SizedBox(width: 12),
         const Text(
-          '80%',
+          '60%',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -127,12 +139,101 @@ class UserInfoView extends GetView<UserInfoController> {
     );
   }
 
+  Widget _buildAgeInput() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: TextField(
+        controller: controller.ageController,
+        keyboardType: TextInputType.number,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        decoration: const InputDecoration(
+          hintText: 'Enter your age',
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.all(16),
+          suffixIcon: Icon(Icons.cake_outlined, color: Color(0xFF8B5CF6)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderSelection() {
+    return Column(
+      children: controller.genders.map((gender) {
+        final isSelected = controller.selectedGender.value == gender['title'];
+        return GestureDetector(
+          onTap: () => controller.selectGender(gender['title']),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color(0xFF8B5CF6).withOpacity(0.1)
+                  : Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF8B5CF6)
+                    : Colors.grey[300]!,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF8B5CF6)
+                        : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    gender['icon'],
+                    color: isSelected ? Colors.white : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    gender['title'],
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? const Color(0xFF8B5CF6)
+                          : Colors.black87,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  const Icon(
+                    Icons.check_circle,
+                    color: Color(0xFF8B5CF6),
+                    size: 24,
+                  ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildWeightInput() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey,
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey!),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
         children: [
@@ -151,18 +252,31 @@ class UserInfoView extends GetView<UserInfoController> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF8B5CF6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              controller.weightUnit.value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
+          GestureDetector(
+            onTap: controller.toggleWeightUnit,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8B5CF6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    controller.weightUnit.value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.swap_horiz,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ],
               ),
             ),
           ),
@@ -175,9 +289,9 @@ class UserInfoView extends GetView<UserInfoController> {
   Widget _buildHeightInput() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey,
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey!),
+        border: Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
         children: [
@@ -196,18 +310,31 @@ class UserInfoView extends GetView<UserInfoController> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF8B5CF6),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              controller.heightUnit.value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
+          GestureDetector(
+            onTap: controller.toggleHeightUnit,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF8B5CF6),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    controller.heightUnit.value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.swap_horiz,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ],
               ),
             ),
           ),
@@ -230,12 +357,12 @@ class UserInfoView extends GetView<UserInfoController> {
             decoration: BoxDecoration(
               color: isSelected
                   ? const Color(0xFF8B5CF6).withOpacity(0.1)
-                  : Colors.grey,
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isSelected
                     ? const Color(0xFF8B5CF6)
-                    : Colors.grey!,
+                    : Colors.grey[300]!,
                 width: isSelected ? 2 : 1,
               ),
             ),
@@ -246,12 +373,12 @@ class UserInfoView extends GetView<UserInfoController> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? const Color(0xFF8B5CF6)
-                        : Colors.grey,
+                        : Colors.grey[300],
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     goal['icon'],
-                    color: isSelected ? Colors.white : Colors.grey,
+                    color: isSelected ? Colors.white : Colors.grey[600],
                     size: 24,
                   ),
                 ),
@@ -275,7 +402,7 @@ class UserInfoView extends GetView<UserInfoController> {
                         goal['description'],
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.grey,
+                          color: Colors.grey[600],
                         ),
                       ),
                     ],
@@ -302,8 +429,13 @@ class UserInfoView extends GetView<UserInfoController> {
     }
 
     try {
-      final weight = double.parse(controller.weightController.text);
-      final height = double.parse(controller.heightController.text);
+      final weight = controller.weightInKg;
+      final height = controller.heightInCm;
+      
+      if (weight <= 0 || height <= 0) {
+        return const SizedBox.shrink();
+      }
+      
       final bmi = weight / ((height / 100) * (height / 100));
 
       String category;
@@ -380,7 +512,7 @@ class UserInfoView extends GetView<UserInfoController> {
         onPressed: controller.isLoading.value ? null : controller.saveUserInfo,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF8B5CF6),
-          disabledBackgroundColor: Colors.grey,
+          disabledBackgroundColor: Colors.grey[400],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:meal_mentor_ai/app/data/models/workout_plan_model.dart';
+import 'package:meal_mentor_ai/app/data/models/user_model.dart';
 import 'package:meal_mentor_ai/app/data/services/wgerservices.dart';
 import 'package:meal_mentor_ai/app/data/services/firebase_service.dart';
+import 'package:meal_mentor_ai/app/data/services/exercise_safety_manager.dart';
+import 'package:meal_mentor_ai/app/data/services/warmup_service.dart';
 import '../../routes/app_routes.dart';
 
 
@@ -155,9 +158,10 @@ class WorkoutPlanController extends GetxController {
       final userId = _firebaseService.currentUser!.uid;
       print('🏋️ Generating workout plan for user: $userId');
 
-      // Verify user document exists
+      // Verify user document exists and get full user data
+      UserModel? userDoc;
       try {
-        final userDoc = await _firebaseService.getUserDocument(userId);
+        userDoc = await _firebaseService.getUserDocument(userId);
         if (userDoc == null) {
           print('⚠️ User document not found. Creating...');
           final currentUser = _firebaseService.currentUser!;
@@ -166,10 +170,16 @@ class WorkoutPlanController extends GetxController {
             name: currentUser.displayName ?? 'User',
             email: currentUser.email ?? '',
           );
-        } else {
+          // Fetch again after creation
+          userDoc = await _firebaseService.getUserDocument(userId);
+        }
+        
+        if (userDoc != null) {
           // Update userGoal from Firebase
           userGoal.value = userDoc.goal ?? 'maintenance';
           print('✅ User goal: ${userGoal.value}');
+          print('📊 User BMI: ${userDoc.bmi.toStringAsFixed(1)} (${userDoc.bmiCategory})');
+          print('💪 Fitness Level: ${userDoc.fitnessLevel ?? selectedDifficulty.value}');
         }
       } catch (e) {
         print('❌ Error checking user document: $e');
@@ -181,6 +191,18 @@ class WorkoutPlanController extends GetxController {
           colorText: Colors.white,
         );
         return;
+      }
+
+      // If user data is incomplete, show warning
+      if (userDoc == null || userDoc.weight == 0 || userDoc.height == 0) {
+        Get.snackbar(
+          'Incomplete Profile',
+          'Please update your weight and height in profile settings for personalized workout plans.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 5),
+        );
       }
 
       // Fetch ALL exercises from Wger API
@@ -232,6 +254,7 @@ class WorkoutPlanController extends GetxController {
             focusMuscles,
             selectedDifficulty.value,
             userGoal.value,
+            userDoc, // Pass user data for personalization
           );
 
           if (dayExercises.isEmpty) {
@@ -240,12 +263,17 @@ class WorkoutPlanController extends GetxController {
             print('✅ Selected ${dayExercises.length} exercises for ${dayPattern['day']}');
           }
 
+          // Add universal warmup for workout days
+          final warmupExercises = WarmupService.getUniversalWarmup();
+          print('🔥 Added ${warmupExercises.length} warmup exercises (${WarmupService.getWarmupDurationMinutes()})');
+
           daysSchedule.add(WorkoutDayModel(
             dayIndex: dayIndex,
             dayName: dayPattern['day'] as String,
             isRest: false,
             focusMuscles: focusMuscles,
             exercises: dayExercises,
+            warmupExercises: warmupExercises, // Add warmup
           ));
         }
         dayIndex++;
@@ -325,8 +353,23 @@ class WorkoutPlanController extends GetxController {
     List<String> targetMuscles,
     String difficulty,
     String goal,
+    UserModel? user, // Add user parameter for personalization
   ) async {
     final selectedExercises = <ExerciseSessionModel>[];
+    
+    // Get BMI-based recommendations if user data available
+    Map<String, dynamic>? bmiRecs;
+    Map<String, dynamic>? ageAdjustments;
+    
+    if (user != null && user.weight > 0 && user.height > 0) {
+      bmiRecs = ExerciseSafetyManager.getBMIRecommendations(user.bmi);
+      ageAdjustments = ExerciseSafetyManager.getAgeAdjustments(user.age);
+      
+      print('  📊 BMI-based filtering: ${bmiRecs['focus']} focus');
+      if (bmiRecs['jointProtection'] == true) {
+        print('  🦴 Joint protection enabled - filtering high-impact exercises');
+      }
+    }
     
     // Determine number of exercises per muscle based on difficulty
     final exercisesPerMuscle = _getExercisesPerMuscle(difficulty);
@@ -338,6 +381,29 @@ class WorkoutPlanController extends GetxController {
       var muscleExercises = allExercises.where((ex) {
         final muscleNames = ex['muscle_names'] as List<dynamic>?;
         if (muscleNames == null || muscleNames.isEmpty) return false;
+        
+        // Apply BMI-based filtering if available
+        if (bmiRecs != null) {
+          final avoidExercises = bmiRecs['avoidExercises'] as List<dynamic>;
+          final exerciseName = (ex['name'] ?? '').toString().toLowerCase();
+          
+          // Check if exercise should be avoided
+          for (final avoid in avoidExercises) {
+            if (exerciseName.contains(avoid.toString().toLowerCase())) {
+              return false;
+            }
+          }
+          
+          // For high BMI, prefer low-impact exercises
+          if (bmiRecs['jointProtection'] == true) {
+            // Skip exercises with jumping, high-impact movements
+            if (exerciseName.contains('jump') || 
+                exerciseName.contains('plyometric') ||
+                exerciseName.contains('box')) {
+              return false;
+            }
+          }
+        }
         
         // Check if any muscle name matches
         return muscleNames.any((m) {
@@ -419,26 +485,46 @@ class WorkoutPlanController extends GetxController {
           return 0;
         });
       }
-
-      // Select appropriate number of exercises
+      
+      // Shuffle and take required number
+      muscleExercises.shuffle();
       final exercisesToAdd = muscleExercises.take(exercisesPerMuscle).toList();
-
-      for (var exercise in exercisesToAdd) {
+      
+      // Get personalized sets, reps, and rest time
+      final setsReps = user != null 
+          ? ExerciseSafetyManager.getSetsAndReps(
+              goal: goal,
+              fitnessLevel: user.fitnessLevel ?? difficulty,
+              bmi: user.bmi,
+            )
+          : {'sets': _getSetsForDifficulty(difficulty), 
+             'reps': _getRepsForDifficulty(difficulty)};
+      
+      final restTime = user != null
+          ? ExerciseSafetyManager.getRestTime(
+              goal: goal,
+              fitnessLevel: user.fitnessLevel ?? difficulty,
+            )
+          : _getRestForDifficulty(difficulty);
+      
+      for (var ex in exercisesToAdd) {
         selectedExercises.add(ExerciseSessionModel(
-          wgerId: exercise['id'] ?? 0,
-          name: exercise['name'] ?? 'Unknown Exercise',
-          targetSets: _getSetsForDifficulty(difficulty),
-          targetReps: _getRepsForDifficulty(difficulty),
-          restSeconds: _getRestForDifficulty(difficulty),
-          equipment: List<String>.from(exercise['equipment_names'] ?? ['Body Weight']),
+          wgerId: ex['id'] ?? 0,
+          name: ex['name'] ?? 'Unknown Exercise',
+          targetSets: setsReps['sets'] as int,
+          targetReps: '${setsReps['reps']}',
+          restSeconds: restTime,
+          equipment: (ex['equipment_names'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ?? ['Body Weight'],
           muscleGroup: muscle,
-          gifUrl: exercise['gifUrl']?.toString(),
+          gifUrl: ex['gifUrl']?.toString(),
         ));
-        
-        print('    ✅ Added: ${exercise['name']}');
       }
+      
+      print('    ✅ Added ${exercisesToAdd.length} exercises for $muscle');
     }
-
+    
     return selectedExercises;
   }
 

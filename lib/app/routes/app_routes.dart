@@ -10,6 +10,7 @@ abstract class AppRoutes {
   static const DIET_PLAN = '/diet-plan';
   static const EXERCISE = '/exercise';
   static const PROFILE = '/profile';
+  static const SETTINGS = '/settings';
   static const CHATBOT = '/chatbot';
 
   static const USER_INFO = '/user-info'; // Add this

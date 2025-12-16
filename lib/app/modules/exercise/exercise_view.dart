@@ -35,17 +35,9 @@ class ExerciseView extends GetView<ExerciseController> {
             children: [
               _buildSearchBar(),
               const SizedBox(height: 20),
-              _buildActivePlanCard(),
-              const SizedBox(height: 32),
-              _buildSectionHeader('Start New Workout'),
-              const SizedBox(height: 16),
-              _buildQuickStartGrid(),
-              const SizedBox(height: 32),
               _buildSectionHeader('Browse Exercises'),
               const SizedBox(height: 16),
-              _buildFilterChips(),
-              const SizedBox(height: 16),
-              _buildCategoryList(),
+              _buildMuscleGroupFilters(),
               const SizedBox(height: 16),
               _buildExerciseList(),
             ],
@@ -87,41 +79,40 @@ class ExerciseView extends GetView<ExerciseController> {
     );
   }
 
-  Widget _buildFilterChips() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          Obx(() => _buildFilterChip(
-            'Difficulty: ${controller.selectedDifficulty.value}',
-                () => _showDifficultyPicker(),
-            controller.selectedDifficulty.value != 'All',
-          )),
-          const SizedBox(width: 8),
-          Obx(() => _buildFilterChip(
-            'Muscle: ${controller.selectedMuscleGroup.value}',
-                () => _showMuscleGroupPicker(),
-            controller.selectedMuscleGroup.value != 'All',
-          )),
-          const SizedBox(width: 8),
-          Obx(() {
-            final hasFilters = controller.selectedCategory.value != 'All' ||
-                controller.selectedDifficulty.value != 'All' ||
-                controller.selectedMuscleGroup.value != 'All' ||
-                controller.searchQuery.value.isNotEmpty;
+  Widget _buildMuscleGroupFilters() {
+    return Obx(() => SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: controller.muscleGroups.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final muscle = controller.muscleGroups[index];
+          final isSelected = controller.selectedMuscleGroup.value == muscle;
 
-            return hasFilters
-                ? _buildFilterChip(
-              'Clear All',
-                  () => controller.clearFilters(),
-              true,
-              color: Colors.red,
-            )
-                : const SizedBox.shrink();
-          }),
-        ],
+          return GestureDetector(
+            onTap: () => controller.setMuscleGroup(muscle),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: isSelected ? null : Border.all(color: AppColors.border),
+              ),
+              child: Center(
+                child: Text(
+                  muscle,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
-    );
+    ));
   }
 
   Widget _buildFilterChip(String label, VoidCallback onTap, bool isActive, {Color? color}) {

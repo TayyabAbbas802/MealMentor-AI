@@ -122,11 +122,23 @@ class ExerciseController extends GetxController {
         };
       }).toList();
 
-      print('📊 Transformed exercises count: ${allExercises.length}');
+      // Filter to show only exercises with images
+      final exercisesWithImages = allExercises.where((ex) {
+        final gifUrl = ex['gifUrl'];
+        return gifUrl != null && gifUrl.toString().isNotEmpty;
+      }).toList();
 
-      filteredExercises.value = allExercises;
+      allExercises.value = exercisesWithImages;
+      filteredExercises.value = exercisesWithImages;
 
-      print('✅ Loaded ${allExercises.length} exercises from Wger API');
+      print('✅ Loaded ${allExercises.length} exercises with images (filtered from ${exercises.length} total)');
+      print('📊 Sample exercise data:');
+      if (allExercises.isNotEmpty) {
+        final sample = allExercises.first;
+        print('   Name: ${sample['name']}');
+        print('   Muscles: ${sample['muscle_names']}');
+        print('   GIF URL: ${sample['gifUrl']}');
+      }
 
       // Update favorites status
       _updateFavoritesStatus();
@@ -170,8 +182,56 @@ class ExerciseController extends GetxController {
         final normalizedFilter = selectedMuscleGroup.value.toLowerCase();
         final hasMatchingMuscle = exerciseMuscles.any((muscle) {
           final normalizedMuscle = muscle.toString().toLowerCase();
-          return normalizedMuscle.contains(normalizedFilter) ||
-              normalizedFilter.contains(normalizedMuscle);
+          
+          // Direct match
+          if (normalizedMuscle.contains(normalizedFilter) ||
+              normalizedFilter.contains(normalizedMuscle)) {
+            return true;
+          }
+          
+          // Map common names to anatomical names
+          if (normalizedFilter == 'chest' && 
+              (normalizedMuscle.contains('pectoral') || normalizedMuscle.contains('chest'))) {
+            return true;
+          }
+          if (normalizedFilter == 'back' && 
+              (normalizedMuscle.contains('latissimus') || normalizedMuscle.contains('trapezius') || 
+               normalizedMuscle.contains('rhomboid') || normalizedMuscle.contains('back'))) {
+            return true;
+          }
+          if (normalizedFilter == 'shoulders' && 
+              (normalizedMuscle.contains('deltoid') || normalizedMuscle.contains('shoulder'))) {
+            return true;
+          }
+          if (normalizedFilter == 'biceps' && 
+              (normalizedMuscle.contains('bicep') || normalizedMuscle.contains('brachialis'))) {
+            return true;
+          }
+          if (normalizedFilter == 'triceps' && 
+              normalizedMuscle.contains('tricep')) {
+            return true;
+          }
+          if (normalizedFilter == 'quads' && 
+              (normalizedMuscle.contains('quad') || normalizedMuscle.contains('rectus femoris') ||
+               normalizedMuscle.contains('vastus'))) {
+            return true;
+          }
+          if (normalizedFilter == 'glutes' && 
+              (normalizedMuscle.contains('glute') || normalizedMuscle.contains('gluteus'))) {
+            return true;
+          }
+          if (normalizedFilter == 'calves' && 
+              (normalizedMuscle.contains('calf') || normalizedMuscle.contains('gastrocnemius') ||
+               normalizedMuscle.contains('soleus'))) {
+            return true;
+          }
+          if (normalizedFilter == 'abs' && 
+              (normalizedMuscle.contains('ab') || normalizedMuscle.contains('oblique') ||
+               normalizedMuscle.contains('rectus abdominis'))) {
+            return true;
+          }
+          
+          return false;
         });
 
         if (!hasMatchingMuscle) return false;

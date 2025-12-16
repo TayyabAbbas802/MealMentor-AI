@@ -1,6 +1,7 @@
 // lib/data/models/workout_plan_model.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'warmup_exercise.dart';
 
 class WorkoutPlanModel {
   final String id;
@@ -61,6 +62,7 @@ class WorkoutDayModel {
   final bool isRest;
   final List<String> focusMuscles;
   final List<ExerciseSessionModel> exercises;
+  final List<WarmupExercise> warmupExercises; // NEW
 
   WorkoutDayModel({
     required this.dayIndex,
@@ -68,6 +70,7 @@ class WorkoutDayModel {
     required this.isRest,
     required this.focusMuscles,
     required this.exercises,
+    this.warmupExercises = const [], // Default to empty list
   });
 
   factory WorkoutDayModel.fromJson(Map<String, dynamic> json) {
@@ -79,6 +82,9 @@ class WorkoutDayModel {
       exercises: (json['exercises'] as List?)
           ?.map((ex) => ExerciseSessionModel.fromJson(ex))
           .toList() ?? [],
+      warmupExercises: (json['warmupExercises'] as List?)
+          ?.map((warmup) => WarmupExercise.fromJson(warmup))
+          .toList() ?? [],
     );
   }
 
@@ -88,6 +94,7 @@ class WorkoutDayModel {
     'isRest': isRest,
     'focusMuscles': focusMuscles,
     'exercises': exercises.map((ex) => ex.toJson()).toList(),
+    'warmupExercises': warmupExercises.map((warmup) => warmup.toJson()).toList(),
   };
 }
 
