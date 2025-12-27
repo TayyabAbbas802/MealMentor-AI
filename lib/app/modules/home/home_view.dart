@@ -25,9 +25,9 @@ class HomeView extends GetView<HomeController> {
                   const SizedBox(height: 16),
                   _buildQuickActionsGrid(),
                   const SizedBox(height: 32),
-                  _buildSectionHeader('Recent Meals'),
+                  _buildSectionHeader('Saved Workout Plans'),
                   const SizedBox(height: 16),
-                  _buildRecentMealsList(),
+                  _buildSavedWorkoutPlansList(),
                   const SizedBox(height: 100), // Bottom padding
                 ],
               ),
@@ -317,31 +317,124 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildRecentMealsList() {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 3,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.border.withOpacity(0.5)),
+  Widget _buildSavedWorkoutPlansList() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.all(32.0),
+            child: CircularProgressIndicator(),
           ),
+        );
+      }
+
+      if (controller.savedWorkoutPlans.isEmpty) {
+        return Card(
+          elevation: 0,
+          color: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: AppColors.border.withOpacity(0.5)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.fitness_center_rounded,
+                  size: 64,
+                  color: Colors.grey.shade300,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'No saved workout plans yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Create your first personalized workout plan',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: controller.navigateToExercise,
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Create Plan'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.savedWorkoutPlans.length > 3 
+            ? 3 
+            : controller.savedWorkoutPlans.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final plan = controller.savedWorkoutPlans[index];
+          return _buildWorkoutPlanCard(plan);
+        },
+      );
+    });
+  }
+
+  Widget _buildWorkoutPlanCard(Map<String, dynamic> plan) {
+    final difficulty = plan['difficulty'] ?? 'Intermediate';
+    final daysPerWeek = plan['daysPerWeek'] ?? 5;
+    final goal = plan['goal'] ?? 'maintenance';
+    
+    // Handle Timestamp from Firebase
+    DateTime? createdAt;
+    if (plan['createdAt'] != null) {
+      if (plan['createdAt'] is DateTime) {
+        createdAt = plan['createdAt'] as DateTime;
+      } else {
+        // It's a Timestamp from Firebase
+        createdAt = (plan['createdAt'] as dynamic).toDate();
+      }
+    }
+
+    return Card(
+      elevation: 0,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppColors.border.withOpacity(0.5)),
+      ),
+      child: InkWell(
+        onTap: () => controller.navigateToWorkoutPlan(plan['id']),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: AppColors.workoutHeaderGradient,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Center(
-                  child: Icon(Icons.fastfood, color: Colors.white, size: 30),
+                child: const Icon(
+                  Icons.fitness_center_rounded,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
               const SizedBox(width: 16),
@@ -350,7 +443,7 @@ class HomeView extends GetView<HomeController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Healthy Salad Bowl ${index + 1}',
+                      '$difficulty Workout',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -358,31 +451,105 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time_rounded, size: 14, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        const Text(
-                          'Lunch • 450 kcal',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      '$daysPerWeek days/week • ${_formatGoal(goal)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
+                    if (createdAt != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Created ${_formatDate(createdAt)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-                onPressed: () {},
+                icon: const Icon(Icons.delete_outline_rounded),
+                color: Colors.red,
+                onPressed: () => _showDeleteConfirmation(plan),
+                tooltip: 'Delete Plan',
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textSecondary,
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  void _showDeleteConfirmation(Map<String, dynamic> plan) {
+    Get.dialog(
+      AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_rounded, color: Colors.orange),
+            SizedBox(width: 12),
+            Text('Delete Workout Plan?'),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to delete this workout plan? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              controller.deleteWorkoutPlan(plan['id']);
+              Get.back();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatGoal(String goal) {
+    switch (goal.toLowerCase()) {
+      case 'muscle_gain':
+      case 'muscle gain':
+        return 'Build Muscle';
+      case 'weight_loss':
+      case 'weight loss':
+        return 'Lose Weight';
+      case 'maintenance':
+        return 'Maintain';
+      default:
+        return goal;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return 'today';
+    } else if (difference.inDays == 1) {
+      return 'yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${(difference.inDays / 7).floor()} weeks ago';
+    }
   }
 
   Widget _buildDrawer() {

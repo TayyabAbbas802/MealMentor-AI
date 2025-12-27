@@ -663,8 +663,217 @@ class FirebaseService extends GetxService {
 
       return calendarData;
     } catch (e) {
-      print('Error getting calendar data: $e'); // Debug
+      print('Error getting calendar data: $e');
       return {};
     }
+  }
+
+  // ============ CHAT CONVERSATION METHODS ============
+
+  /// Create a new chat conversation
+  Future<String> createChatConversation({
+    required String userId,
+    required String title,
+  }) async {
+    try {
+      final docRef = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .add({
+        'userId': userId,
+        'title': title,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'messageCount': 0,
+      });
+
+      print('Chat conversation created with ID: ${docRef.id}');
+      return docRef.id;
+    } catch (e) {
+      print('Error creating chat conversation: $e');
+      throw 'Failed to create chat conversation: ${e.toString()}';
+    }
+  }
+
+  /// Get all chat conversations for a user
+  Future<List<Map<String, dynamic>>> getChatConversations(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .orderBy('updatedAt', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => {
+                'id': doc.id,
+                ...doc.data(),
+              })
+          .toList();
+    } catch (e) {
+      print('Error getting chat conversations: $e');
+      return [];
+    }
+  }
+
+  /// Stream chat conversations (real-time updates)
+  Stream<List<Map<String, dynamic>>> streamChatConversations(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('chatConversations')
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  ...doc.data(),
+                })
+            .toList());
+  }
+
+  /// Update conversation title
+  Future<void> updateConversationTitle({
+    required String userId,
+    required String conversationId,
+    required String title,
+  }) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .doc(conversationId)
+          .update({
+        'title': title,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error updating conversation title: $e');
+      throw 'Failed to update conversation title: ${e.toString()}';
+    }
+  }
+
+  /// Delete a chat conversation and all its messages
+  Future<void> deleteChatConversation({
+    required String userId,
+    required String conversationId,
+  }) async {
+    try {
+      // Delete all messages in the conversation
+      final messagesSnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .doc(conversationId)
+          .collection('messages')
+          .get();
+
+      for (var doc in messagesSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Delete the conversation
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .doc(conversationId)
+          .delete();
+
+      print('Chat conversation deleted: $conversationId');
+    } catch (e) {
+      print('Error deleting chat conversation: $e');
+      throw 'Failed to delete chat conversation: ${e.toString()}';
+    }
+  }
+
+  /// Save a message to a conversation
+  Future<String> saveChatMessage({
+    required String userId,
+    required String conversationId,
+    required String content,
+    required bool isUser,
+  }) async {
+    try {
+      final docRef = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .doc(conversationId)
+          .collection('messages')
+          .add({
+        'conversationId': conversationId,
+        'content': content,
+        'isUser': isUser,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Update conversation's updatedAt and messageCount
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .doc(conversationId)
+          .update({
+        'updatedAt': FieldValue.serverTimestamp(),
+        'messageCount': FieldValue.increment(1),
+      });
+
+      return docRef.id;
+    } catch (e) {
+      print('Error saving chat message: $e');
+      throw 'Failed to save chat message: ${e.toString()}';
+    }
+  }
+
+  /// Get all messages for a conversation
+  Future<List<Map<String, dynamic>>> getChatMessages({
+    required String userId,
+    required String conversationId,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('chatConversations')
+          .doc(conversationId)
+          .collection('messages')
+          .orderBy('timestamp', descending: false)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => {
+                'id': doc.id,
+                ...doc.data(),
+              })
+          .toList();
+    } catch (e) {
+      print('Error getting chat messages: $e');
+      return [];
+    }
+  }
+
+  /// Stream messages for a conversation (real-time updates)
+  Stream<List<Map<String, dynamic>>> streamChatMessages({
+    required String userId,
+    required String conversationId,
+  }) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('chatConversations')
+        .doc(conversationId)
+        .collection('messages')
+        .orderBy('timestamp', descending: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  ...doc.data(),
+                })
+            .toList());
   }
 }

@@ -3,24 +3,40 @@ import 'package:get/get.dart';
 import 'workout_plan_controller.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/exercise_video_player.dart';
 
 class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
   const WeeklyPlanScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Weekly Plan'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => Get.offNamed(AppRoutes.EXERCISE_SETUP),
-            tooltip: 'Create New Plan',
-          ),
-        ],
-      ),
+    // Check if user came from home screen
+    final fromHome = Get.arguments?['fromHome'] ?? false;
+    
+    return WillPopScope(
+      onWillPop: () async {
+        // Skip save prompt if coming from home screen
+        if (fromHome) {
+          return true;
+        }
+        
+        if (controller.currentPlan.value != null) {
+          return await _showSavePrompt() ?? false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Your Weekly Plan'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: () => Get.offNamed(AppRoutes.EXERCISE_SETUP),
+              tooltip: 'Create New Plan',
+            ),
+          ],
+        ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -91,6 +107,43 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
           ),
         );
       }),
+      ),
+    );
+  }
+
+  Future<bool?> _showSavePrompt() async {
+    return await Get.dialog<bool>(
+      AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.save_rounded, color: AppColors.primary),
+            SizedBox(width: 12),
+            Text('Save Workout Plan?'),
+          ],
+        ),
+        content: const Text(
+          'Would you like to save this workout plan? You can access it later from the home screen.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(result: true); // Don't save, just go back
+            },
+            child: const Text('No', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await controller.saveWorkoutPlan();
+              Get.back(result: true); // Save and go back
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Yes, Save'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -119,12 +172,12 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
               ),
             ),
             const SizedBox(height: 12),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _buildHeaderChip(Icons.calendar_today_rounded, '${plan.daysPerWeek} days/week'),
-                const SizedBox(width: 12),
                 _buildHeaderChip(Icons.speed_rounded, plan.difficulty ?? 'Intermediate'),
-                const SizedBox(width: 12),
                 _buildHeaderChip(Icons.flag_rounded, _formatGoal(plan.goal ?? 'maintenance')),
               ],
             ),
@@ -443,7 +496,9 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
                     if (exercise.equipment != null && exercise.equipment.isNotEmpty)
                       _buildExerciseChip(
                         Icons.build_rounded,
-                        exercise.equipment.first,
+                        exercise.equipment.first.length > 15 
+                            ? '${exercise.equipment.first.substring(0, 15)}...'
+                            : exercise.equipment.first,
                         AppColors.textSecondary,
                       ),
                   ],
@@ -457,6 +512,7 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
   }
 
   void _showExerciseDetailDialog(dynamic exercise, int exerciseNumber) {
+    final hasVideo = exercise.youtubeVideoId != null && exercise.youtubeVideoId.toString().isNotEmpty;
     final hasGif = exercise.gifUrl != null && exercise.gifUrl.toString().isNotEmpty;
     
     showDialog(
@@ -515,8 +571,15 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
                   ],
                 ),
               ),
-              // Image/GIF
-              if (hasGif)
+              // Video Player or Image/GIF
+              if (hasVideo)
+                Container(
+                  width: double.infinity,
+                  height: 300,
+                  color: AppColors.background,
+                  child: _buildVideoPlayer(exercise.youtubeVideoId.toString(), exercise.name ?? 'Exercise'),
+                )
+              else if (hasGif)
                 Container(
                   width: double.infinity,
                   height: 300,
@@ -614,6 +677,16 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
     );
   }
 
+  Widget _buildVideoPlayer(String videoId, String exerciseName) {
+    // Import the ExerciseVideoPlayer widget
+    return ExerciseVideoPlayer(
+      youtubeVideoId: videoId,
+      exerciseName: exerciseName,
+      autoPlay: true,
+      showControls: true,
+    );
+  }
+
   Widget _buildDetailRow(IconData icon, String label, String value, Color color) {
     return Row(
       children: [
@@ -664,12 +737,16 @@ class WeeklyPlanScreen extends GetView<WorkoutPlanController> {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

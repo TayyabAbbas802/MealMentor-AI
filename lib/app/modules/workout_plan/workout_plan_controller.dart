@@ -308,6 +308,9 @@ class WorkoutPlanController extends GetxController {
       // Load the created plan
       await loadWorkoutPlan(userId, planId);
 
+      // ✅ Fetch YouTube videos for exercises in the plan
+      await _fetchYouTubeVideosForPlan();
+
       print('✅ Workout plan created successfully!');
 
       Get.snackbar(
@@ -677,6 +680,162 @@ class WorkoutPlanController extends GetxController {
       Get.snackbar('Success', 'Workout plan deleted!');
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete plan: $e');
+    }
+  }
+
+  /// Save the current workout plan
+  Future<void> saveWorkoutPlan() async {
+    try {
+      if (currentPlan.value == null) {
+        Get.snackbar(
+          'Error',
+          'No plan to save',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      final userId = _firebaseService.currentUser?.uid;
+      if (userId == null) {
+        Get.snackbar(
+          'Error',
+          'Please log in to save your plan',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // The plan is already saved in Firebase, just show confirmation
+      Get.snackbar(
+        'Success',
+        'Workout plan saved successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+      
+    } catch (e) {
+      print('Error saving workout plan: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to save workout plan',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  String _formatWeight(double weight, String unit) {
+    if (unit == 'kg') return '${weight.toStringAsFixed(1)} kg';
+    return '${(weight / 2.2).toStringAsFixed(1)} lbs';
+  }
+
+  /// Fetch YouTube videos for exercises in the current plan
+  Future<void> _fetchYouTubeVideosForPlan() async {
+    if (currentPlan.value == null) return;
+
+    try {
+      print('🎬 Fetching YouTube videos for workout plan exercises...');
+      
+      // Collect all unique exercises from the plan
+      final allExercises = <Map<String, dynamic>>[];
+      final seenExerciseIds = <int>{};
+      
+      for (final day in currentPlan.value!.daysSchedule) {
+        if (day.isRest) continue;
+        
+        for (final exercise in day.exercises) {
+          // Avoid duplicates
+          if (seenExerciseIds.contains(exercise.wgerId)) continue;
+          seenExerciseIds.add(exercise.wgerId);
+          
+          allExercises.add({
+            'id': exercise.wgerId,
+            'name': exercise.name,
+            'gifUrl': exercise.gifUrl,
+            'youtubeVideoId': null,
+          });
+        }
+      }
+      
+      print('📊 Found ${allExercises.length} unique exercises in plan');
+      
+      // Fetch YouTube videos for these exercises
+      final enrichedExercises = await _wgerService.enrichExercisesWithVideos(
+        allExercises,
+        maxConcurrent: 3, // Fetch 3 at a time to avoid rate limiting
+      );
+      
+      // Update exercises in the plan with video IDs
+      final updatedDays = <WorkoutDayModel>[];
+      for (final day in currentPlan.value!.daysSchedule) {
+        if (day.isRest) {
+          updatedDays.add(day);
+          continue;
+        }
+        
+        final updatedExercises = <ExerciseSessionModel>[];
+        for (final exercise in day.exercises) {
+          // Find enriched exercise
+          final enriched = enrichedExercises.firstWhere(
+            (e) => e['id'] == exercise.wgerId,
+            orElse: () => {'youtubeVideoId': null, 'gifUrl': exercise.gifUrl},
+          );
+          
+          updatedExercises.add(ExerciseSessionModel(
+            wgerId: exercise.wgerId,
+            name: exercise.name,
+            targetSets: exercise.targetSets,
+            targetReps: exercise.targetReps,
+            restSeconds: exercise.restSeconds,
+            equipment: exercise.equipment,
+            muscleGroup: exercise.muscleGroup,
+            gifUrl: enriched['gifUrl']?.toString() ?? exercise.gifUrl,
+            youtubeVideoId: enriched['youtubeVideoId']?.toString(),
+          ));
+        }
+        
+        updatedDays.add(WorkoutDayModel(
+          dayIndex: day.dayIndex,
+          dayName: day.dayName,
+          isRest: day.isRest,
+          focusMuscles: day.focusMuscles,
+          exercises: updatedExercises,
+          warmupExercises: day.warmupExercises,
+        ));
+      }
+      
+      // Update current plan with enriched exercises
+      currentPlan.value = WorkoutPlanModel(
+        id: currentPlan.value!.id,
+        name: currentPlan.value!.name,
+        difficulty: currentPlan.value!.difficulty,
+        daysPerWeek: currentPlan.value!.daysPerWeek,
+        goal: currentPlan.value!.goal,
+        createdAt: currentPlan.value!.createdAt,
+        daysSchedule: updatedDays,
+      );
+      
+      // Save updated plan to Firebase
+      final userId = _firebaseService.currentUser?.uid;
+      if (userId != null && currentPlanId.value != null) {
+        await _firebaseService.updateWorkoutPlan(
+          userId: userId,
+          planId: currentPlanId.value!,
+          updateData: {
+            'daysSchedule': updatedDays.map((d) => d.toJson()).toList(),
+          },
+        );
+      }
+      
+      final videosFound = enrichedExercises.where((e) => e['youtubeVideoId'] != null).length;
+      print('✅ Fetched YouTube videos: $videosFound/${allExercises.length} exercises');
+      
+    } catch (e) {
+      print('⚠️ Error fetching YouTube videos: $e');
+      // Don't fail the whole plan creation if video fetching fails
     }
   }
 }

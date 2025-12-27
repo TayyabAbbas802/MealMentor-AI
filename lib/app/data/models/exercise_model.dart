@@ -12,6 +12,7 @@ class ExerciseModel {
   final int? caloriesBurned;
   final String? videoUrl;
   final String? imageUrl;
+  final String? youtubeVideoId;
 
   ExerciseModel({
     required this.id,
@@ -25,6 +26,7 @@ class ExerciseModel {
     this.caloriesBurned,
     this.videoUrl,
     this.imageUrl,
+    this.youtubeVideoId,
   });
 
   factory ExerciseModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class ExerciseModel {
       caloriesBurned: json['caloriesBurned'],
       videoUrl: json['videoUrl'],
       imageUrl: json['imageUrl'],
+      youtubeVideoId: json['youtubeVideoId'],
     );
   }
 
@@ -67,6 +70,7 @@ class ExerciseModel {
     'caloriesBurned': caloriesBurned,
     'videoUrl': videoUrl,
     'imageUrl': imageUrl,
+    'youtubeVideoId': youtubeVideoId,
   };
 }
 

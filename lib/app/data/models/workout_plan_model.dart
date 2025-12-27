@@ -108,6 +108,7 @@ class ExerciseSessionModel {
   final String? notes;
   final String? muscleGroup;
   final String? gifUrl;
+  final String? youtubeVideoId;
 
   ExerciseSessionModel({
     required this.wgerId,
@@ -119,6 +120,7 @@ class ExerciseSessionModel {
     this.notes,
     this.muscleGroup,
     this.gifUrl,
+    this.youtubeVideoId,
   });
 
   factory ExerciseSessionModel.fromJson(Map<String, dynamic> json) {
@@ -132,6 +134,7 @@ class ExerciseSessionModel {
       notes: json['notes'],
       muscleGroup: json['muscleGroup'],
       gifUrl: json['gifUrl'],
+      youtubeVideoId: json['youtubeVideoId'],
     );
   }
 
@@ -145,5 +148,6 @@ class ExerciseSessionModel {
     'notes': notes,
     'muscleGroup': muscleGroup,
     'gifUrl': gifUrl,
+    'youtubeVideoId': youtubeVideoId,
   };
 }

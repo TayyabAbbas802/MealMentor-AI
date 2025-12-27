@@ -802,76 +802,84 @@ class ExerciseView extends GetView<ExerciseController> {
               ],
             ),
             const SizedBox(height: 16),
-            if (exercise['gifUrl'] != null)
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.network(
-                  exercise['gifUrl'],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(Icons.fitness_center_rounded, size: 64),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildInfoChip('${exercise['sets']} Sets', Icons.repeat_rounded),
-                _buildInfoChip('${exercise['reps']} Reps', Icons.fitness_center_rounded),
-                _buildInfoChip('${exercise['calories']} Cal', Icons.local_fire_department_rounded),
-                _buildInfoChip(exercise['difficulty'] ?? 'Beginner', Icons.speed_rounded),
-              ],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Target Muscles',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: (exercise['muscle_names'] as List?)
-                  ?.map((muscle) => Chip(
-                label: Text(muscle.toString()),
-                backgroundColor: AppColors.getMuscleColor(exercise['muscleGroup']).withOpacity(0.2),
-              ))
-                  .toList() ??
-                  [],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Equipment',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: (exercise['equipment'] as List?)
-                  ?.map((eq) => Chip(label: Text(eq.toString())))
-                  .toList() ??
-                  [],
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Instructions',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
             Expanded(
               child: SingleChildScrollView(
-                child: Text(
-                  exercise['instructions'] ?? 'No instructions available',
-                  style: const TextStyle(color: AppColors.textSecondary, height: 1.5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (exercise['gifUrl'] != null)
+                      Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.network(
+                          exercise['gifUrl'],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Icon(Icons.fitness_center_rounded, size: 64),
+                            );
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildInfoChip('${exercise['sets']} Sets', Icons.repeat_rounded),
+                        _buildInfoChip('${exercise['reps']} Reps', Icons.fitness_center_rounded),
+                        _buildInfoChip('${exercise['calories']} Cal', Icons.local_fire_department_rounded),
+                        _buildInfoChip(exercise['difficulty'] ?? 'Beginner', Icons.speed_rounded),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Target Muscles',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: (exercise['muscle_names'] as List?)
+                          ?.map((muscle) => Chip(
+                        label: Text(muscle.toString()),
+                        backgroundColor: AppColors.getMuscleColor(exercise['muscleGroup']).withOpacity(0.2),
+                      ))
+                          .toList() ??
+                          [],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Equipment',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: (exercise['equipment'] as List?)
+                          ?.map((eq) => Chip(label: Text(eq.toString())))
+                          .toList() ??
+                          [],
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Instructions',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      exercise['instructions'] ?? 'No instructions available',
+                      style: const TextStyle(color: AppColors.textSecondary, height: 1.5),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
             ),

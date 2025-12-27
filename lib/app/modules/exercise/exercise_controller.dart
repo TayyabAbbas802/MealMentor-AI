@@ -13,6 +13,13 @@ class ExerciseController extends GetxController {
   final filteredExercises = <Map<String, dynamic>>[].obs;
   final favoriteExercises = <Map<String, dynamic>>[].obs;
   final Rx<Map<String, dynamic>?> userData = Rx<Map<String, dynamic>?>(null);
+  
+  // Pagination
+  final displayedExercises = <Map<String, dynamic>>[].obs;
+  final currentPage = 0.obs;
+  final pageSize = 50;
+  final hasMoreExercises = true.obs;
+  
   // Loading & error states
   final isLoading = false.obs;
   final errorMessage = ''.obs;
@@ -56,8 +63,8 @@ class ExerciseController extends GetxController {
     super.onInit();
     _wgerService = Get.find<WgerService>();
     _firebaseService = Get.find<FirebaseService>();
-    _loadUserData(); // Add this
-    fetchExercisesFromWger();
+    _loadUserData();
+    fetchInitialExercises(); // Load only first page
     _loadFavorites();
   }
 
@@ -76,31 +83,22 @@ class ExerciseController extends GetxController {
     }
   }
 
-  /// Fetch exercises from Wger API
-  Future<void> fetchExercisesFromWger() async {
+  /// Fetch initial exercises (first 50 only)
+  Future<void> fetchInitialExercises() async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
+      currentPage.value = 0;
 
       final exercises = await _wgerService.getExercises();
+      print('📊 Total exercises available: ${exercises.length}');
 
-      print('📊 Raw exercises count: ${exercises.length}');
-
-      // Transform API data to our format
-      allExercises.value = exercises.map((ex) {
-        // Get primary muscle group
+      // Transform and filter exercises with images
+      final transformedExercises = exercises.map((ex) {
         final muscleNames = ex['muscle_names'] as List<dynamic>?;
         final primaryMuscle = (muscleNames?.isNotEmpty == true)
             ? muscleNames!.first.toString()
             : 'Full Body';
-
-        // Debug print for first few exercises
-        if (exercises.indexOf(ex) < 3) {
-          print('🔍 Exercise ${ex['id']}: ${ex['name']}');
-          print('   Category: ${ex['category']}');
-          print('   Muscles: $muscleNames');
-          print('   Equipment: ${ex['equipment_names']}');
-        }
 
         return {
           'id': '${ex['id']}',
@@ -108,7 +106,7 @@ class ExerciseController extends GetxController {
           'name': ex['name'] ?? 'Unknown Exercise',
           'category': ex['category'] ?? 'Strength',
           'difficulty': _calculateDifficulty(ex),
-          'duration': 15, // Default duration in minutes
+          'duration': 15,
           'calories': _estimateCalories(ex),
           'description': _cleanDescription(ex['description'] ?? ''),
           'sets': _recommendSets(ex),
@@ -120,27 +118,21 @@ class ExerciseController extends GetxController {
           'gifUrl': ex['gifUrl'],
           'isFavorite': false,
         };
-      }).toList();
-
-      // Filter to show only exercises with images
-      final exercisesWithImages = allExercises.where((ex) {
+      }).where((ex) {
         final gifUrl = ex['gifUrl'];
         return gifUrl != null && gifUrl.toString().isNotEmpty;
       }).toList();
 
-      allExercises.value = exercisesWithImages;
-      filteredExercises.value = exercisesWithImages;
+      // Store all exercises
+      allExercises.value = transformedExercises;
+      
+      // Display only first 50
+      displayedExercises.value = transformedExercises.take(pageSize).toList();
+      filteredExercises.value = displayedExercises;
+      
+      hasMoreExercises.value = transformedExercises.length > pageSize;
 
-      print('✅ Loaded ${allExercises.length} exercises with images (filtered from ${exercises.length} total)');
-      print('📊 Sample exercise data:');
-      if (allExercises.isNotEmpty) {
-        final sample = allExercises.first;
-        print('   Name: ${sample['name']}');
-        print('   Muscles: ${sample['muscle_names']}');
-        print('   GIF URL: ${sample['gifUrl']}');
-      }
-
-      // Update favorites status
+      print('✅ Loaded ${displayedExercises.length} of ${allExercises.length} exercises');
       _updateFavoritesStatus();
 
     } catch (e, stackTrace) {
@@ -157,9 +149,87 @@ class ExerciseController extends GetxController {
     }
   }
 
+  /// Load more exercises (pagination)
+  void loadMoreExercises() {
+    if (!hasMoreExercises.value) return;
+
+    final nextPage = currentPage.value + 1;
+    final startIndex = nextPage * pageSize;
+    final endIndex = (startIndex + pageSize).clamp(0, allExercises.length);
+
+    if (startIndex >= allExercises.length) {
+      hasMoreExercises.value = false;
+      return;
+    }
+
+    final moreExercises = allExercises.sublist(startIndex, endIndex);
+    displayedExercises.addAll(moreExercises);
+    currentPage.value = nextPage;
+    
+    hasMoreExercises.value = endIndex < allExercises.length;
+    
+    print('📄 Loaded page $nextPage: ${moreExercises.length} more exercises');
+  }
+
+  /// Fetch exercises from Wger API (kept for compatibility)
+  Future<void> fetchExercisesFromWger() async {
+    await fetchInitialExercises();
+  }
+
   /// Apply filters to exercise list
   void applyFilters() {
-    filteredExercises.value = allExercises.where((exercise) {
+    // If search query exists, search across ALL exercises in real-time
+    if (searchQuery.value.isNotEmpty) {
+      final query = searchQuery.value.toLowerCase();
+      
+      filteredExercises.value = allExercises.where((exercise) {
+        final name = (exercise['name'] ?? '').toString().toLowerCase();
+        final description = (exercise['description'] ?? '').toString().toLowerCase();
+        final muscles = (exercise['muscle_names'] as List?)
+            ?.map((m) => m.toString().toLowerCase())
+            .join(' ') ?? '';
+
+        final matchesSearch = name.contains(query) ||
+            description.contains(query) ||
+            muscles.contains(query);
+        
+        if (!matchesSearch) return false;
+
+        // Apply other filters
+        if (selectedCategory.value != 'All' &&
+            exercise['category'] != selectedCategory.value) {
+          return false;
+        }
+
+        if (selectedDifficulty.value != 'All' &&
+            exercise['difficulty'] != selectedDifficulty.value) {
+          return false;
+        }
+
+        if (selectedMuscleGroup.value != 'All') {
+          final exerciseMuscles = exercise['muscle_names'] as List<dynamic>?;
+          if (exerciseMuscles == null || exerciseMuscles.isEmpty) {
+            return false;
+          }
+
+          final normalizedFilter = selectedMuscleGroup.value.toLowerCase();
+          final hasMatchingMuscle = exerciseMuscles.any((muscle) {
+            final normalizedMuscle = muscle.toString().toLowerCase();
+            return _matchesMuscleGroup(normalizedMuscle, normalizedFilter);
+          });
+
+          if (!hasMatchingMuscle) return false;
+        }
+
+        return true;
+      }).toList();
+      
+      print('🔍 Search results: ${filteredExercises.length} exercises found for "$query"');
+      return;
+    }
+
+    // No search query - filter displayed exercises only
+    filteredExercises.value = displayedExercises.where((exercise) {
       // Category filter
       if (selectedCategory.value != 'All' &&
           exercise['category'] != selectedCategory.value) {
@@ -182,77 +252,66 @@ class ExerciseController extends GetxController {
         final normalizedFilter = selectedMuscleGroup.value.toLowerCase();
         final hasMatchingMuscle = exerciseMuscles.any((muscle) {
           final normalizedMuscle = muscle.toString().toLowerCase();
-          
-          // Direct match
-          if (normalizedMuscle.contains(normalizedFilter) ||
-              normalizedFilter.contains(normalizedMuscle)) {
-            return true;
-          }
-          
-          // Map common names to anatomical names
-          if (normalizedFilter == 'chest' && 
-              (normalizedMuscle.contains('pectoral') || normalizedMuscle.contains('chest'))) {
-            return true;
-          }
-          if (normalizedFilter == 'back' && 
-              (normalizedMuscle.contains('latissimus') || normalizedMuscle.contains('trapezius') || 
-               normalizedMuscle.contains('rhomboid') || normalizedMuscle.contains('back'))) {
-            return true;
-          }
-          if (normalizedFilter == 'shoulders' && 
-              (normalizedMuscle.contains('deltoid') || normalizedMuscle.contains('shoulder'))) {
-            return true;
-          }
-          if (normalizedFilter == 'biceps' && 
-              (normalizedMuscle.contains('bicep') || normalizedMuscle.contains('brachialis'))) {
-            return true;
-          }
-          if (normalizedFilter == 'triceps' && 
-              normalizedMuscle.contains('tricep')) {
-            return true;
-          }
-          if (normalizedFilter == 'quads' && 
-              (normalizedMuscle.contains('quad') || normalizedMuscle.contains('rectus femoris') ||
-               normalizedMuscle.contains('vastus'))) {
-            return true;
-          }
-          if (normalizedFilter == 'glutes' && 
-              (normalizedMuscle.contains('glute') || normalizedMuscle.contains('gluteus'))) {
-            return true;
-          }
-          if (normalizedFilter == 'calves' && 
-              (normalizedMuscle.contains('calf') || normalizedMuscle.contains('gastrocnemius') ||
-               normalizedMuscle.contains('soleus'))) {
-            return true;
-          }
-          if (normalizedFilter == 'abs' && 
-              (normalizedMuscle.contains('ab') || normalizedMuscle.contains('oblique') ||
-               normalizedMuscle.contains('rectus abdominis'))) {
-            return true;
-          }
-          
-          return false;
+          return _matchesMuscleGroup(normalizedMuscle, normalizedFilter);
         });
 
         if (!hasMatchingMuscle) return false;
       }
 
-      // Search query filter
-      if (searchQuery.value.isNotEmpty) {
-        final query = searchQuery.value.toLowerCase();
-        final name = (exercise['name'] ?? '').toString().toLowerCase();
-        final description = (exercise['description'] ?? '').toString().toLowerCase();
-        final muscles = (exercise['muscle_names'] as List?)
-            ?.map((m) => m.toString().toLowerCase())
-            .join(' ') ?? '';
-
-        return name.contains(query) ||
-            description.contains(query) ||
-            muscles.contains(query);
-      }
-
       return true;
     }).toList();
+  }
+
+  /// Helper method to match muscle groups
+  bool _matchesMuscleGroup(String muscleName, String filter) {
+    // Direct match
+    if (muscleName.contains(filter) || filter.contains(muscleName)) {
+      return true;
+    }
+    
+    // Map common names to anatomical names
+    if (filter == 'chest' && 
+        (muscleName.contains('pectoral') || muscleName.contains('chest'))) {
+      return true;
+    }
+    if (filter == 'back' && 
+        (muscleName.contains('latissimus') || muscleName.contains('trapezius') || 
+         muscleName.contains('rhomboid') || muscleName.contains('back'))) {
+      return true;
+    }
+    if (filter == 'shoulders' && 
+        (muscleName.contains('deltoid') || muscleName.contains('shoulder'))) {
+      return true;
+    }
+    if (filter == 'biceps' && 
+        (muscleName.contains('bicep') || muscleName.contains('brachialis'))) {
+      return true;
+    }
+    if (filter == 'triceps' && 
+        muscleName.contains('tricep')) {
+      return true;
+    }
+    if (filter == 'quads' && 
+        (muscleName.contains('quad') || muscleName.contains('rectus femoris') ||
+         muscleName.contains('vastus'))) {
+      return true;
+    }
+    if (filter == 'glutes' && 
+        (muscleName.contains('glute') || muscleName.contains('gluteus'))) {
+      return true;
+    }
+    if (filter == 'calves' && 
+        (muscleName.contains('calf') || muscleName.contains('gastrocnemius') ||
+         muscleName.contains('soleus'))) {
+      return true;
+    }
+    if (filter == 'abs' && 
+        (muscleName.contains('ab') || muscleName.contains('oblique') ||
+         muscleName.contains('rectus abdominis'))) {
+      return true;
+    }
+    
+    return false;
   }
 
   /// Set category filter

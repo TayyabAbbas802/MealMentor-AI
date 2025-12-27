@@ -13,7 +13,7 @@ import '../modules/home/home_view.dart';
 import '../modules/meal_scan/meal_scan_binding.dart';
 import '../modules/meal_scan/meal_scan_view.dart';
 import '../modules/nutrition/nutrition_binding.dart';
-import '../modules/nutrition/nutrition_view.dart';
+import '../modules/nutrition/progress_view.dart';
 import '../modules/diet_plan/diet_plan_binding.dart';
 import '../modules/diet_plan/diet_plan_view.dart';
 import '../modules/chatbot/chatbot_binding.dart';
@@ -110,7 +110,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.NUTRITION,
-      page: () => const NutritionView(),
+      page: () => const ProgressView(),
       binding: NutritionBinding(),
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 300),

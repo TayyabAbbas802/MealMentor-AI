@@ -1,6 +1,7 @@
 // lib/data/services/wgerservices.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'youtube_exercise_service.dart';
 
 class WgerService {
   static const String baseUrl = 'https://wger.de/api/v2';
@@ -10,9 +11,13 @@ class WgerService {
   List<Map<String, dynamic>> _cachedExercises = [];
   DateTime? _cacheTimestamp;
   static const Duration _cacheDuration = Duration(hours: 24);
+  
+  // YouTube service for video integration
+  final YouTubeExerciseService _youtubeService;
 
-  WgerService({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+  WgerService({http.Client? httpClient, YouTubeExerciseService? youtubeService})
+      : _httpClient = httpClient ?? http.Client(),
+        _youtubeService = youtubeService ?? YouTubeExerciseService();
 
   /// Check if cache is valid
   bool get _isCacheValid {
@@ -95,6 +100,10 @@ class WgerService {
       }
 
       print('✅ Final filtered count: ${exercises.length} exercises');
+      
+      // NOTE: YouTube videos are NOT auto-fetched to avoid quota limits
+      // Use enrichExercisesWithVideos() manually when needed
+      
       return exercises;
     } catch (e) {
       print('❌ Error in getExercises: $e');
@@ -283,6 +292,7 @@ class WgerService {
         'equipment_names': equipmentNames,
         'gifUrl': imageUrl,
         'language': ex['language'],
+        'youtubeVideoId': null, // Will be populated on demand
       };
 
       // Debug first few processed results
@@ -364,5 +374,53 @@ class WgerService {
       'lastUpdated': _cacheTimestamp?.toIso8601String(),
       'isValid': _isCacheValid,
     };
+  }
+  
+  /// Get YouTube video ID for an exercise
+  Future<String?> getExerciseVideoId(String exerciseName) async {
+    return await _youtubeService.searchExerciseVideo(exerciseName);
+  }
+  
+  /// Enrich exercise with YouTube video ID
+  Future<Map<String, dynamic>> enrichExerciseWithVideo(
+    Map<String, dynamic> exercise,
+  ) async {
+    final name = exercise['name'] as String?;
+    if (name == null || name.isEmpty) return exercise;
+    
+    // Check if already has video ID
+    if (exercise['youtubeVideoId'] != null) return exercise;
+    
+    // Fetch video ID
+    final videoId = await _youtubeService.searchExerciseVideo(name);
+    
+    // If video found, use YouTube thumbnail instead of WGER image
+    final gifUrl = videoId != null 
+        ? _youtubeService.getThumbnailUrl(videoId, quality: 'high')
+        : exercise['gifUrl'];
+    
+    return {
+      ...exercise,
+      'youtubeVideoId': videoId,
+      'gifUrl': gifUrl, // Replace with YouTube thumbnail
+    };
+  }
+  
+  /// Batch enrich exercises with YouTube videos
+  Future<List<Map<String, dynamic>>> enrichExercisesWithVideos(
+    List<Map<String, dynamic>> exercises, {
+    int maxConcurrent = 5,
+  }) async {
+    final enriched = <Map<String, dynamic>>[];
+    
+    for (var i = 0; i < exercises.length; i += maxConcurrent) {
+      final batch = exercises.skip(i).take(maxConcurrent);
+      final enrichedBatch = await Future.wait(
+        batch.map((ex) => enrichExerciseWithVideo(ex)),
+      );
+      enriched.addAll(enrichedBatch);
+    }
+    
+    return enriched;
   }
 }

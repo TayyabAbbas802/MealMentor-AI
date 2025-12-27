@@ -10,11 +10,13 @@ class HomeController extends GetxController {
   final currentIndex = 0.obs;
   final currentUser = Rxn<UserModel>();
   final isLoading = true.obs;
+  final savedWorkoutPlans = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
     super.onInit();
     _loadUserData();
+    _loadWorkoutPlans();
   }
 
   void _loadUserData() async {
@@ -206,6 +208,52 @@ class HomeController extends GetxController {
         'Error',
         'Failed to logout: $e',
         snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> _loadWorkoutPlans() async {
+    try {
+      final userId = _firebaseService.currentUser?.uid;
+      if (userId == null) return;
+
+      final plans = await _firebaseService.getWorkoutPlans(userId);
+      savedWorkoutPlans.value = plans;
+      print('📋 Loaded ${plans.length} workout plans');
+    } catch (e) {
+      print('Error loading workout plans: $e');
+    }
+  }
+
+  void navigateToWorkoutPlan(String planId) {
+    Get.toNamed(AppRoutes.WEEKLY_PLAN, arguments: {'fromHome': true});
+  }
+
+  Future<void> deleteWorkoutPlan(String planId) async {
+    try {
+      final userId = _firebaseService.currentUser?.uid;
+      if (userId == null) return;
+
+      await _firebaseService.deleteWorkoutPlan(userId, planId);
+      
+      // Reload workout plans to refresh UI
+      await _loadWorkoutPlans();
+      
+      Get.snackbar(
+        'Success',
+        'Workout plan deleted successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print('Error deleting workout plan: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to delete workout plan',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
